@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemDataEquipTrinket" load_steps=4 format=3 uid="uid://b047rq2wajn31"]
+
+[ext_resource type="Script" uid="uid://b4kkypi5d850e" path="res://Scripts/Item/item_data_equip_trinket.gd" id="1_sev0u"]
+[ext_resource type="Texture2D" uid="uid://c4ucu1pagjaep" path="res://Assets/Resources/textures/Icon_atlas/Trinket_AtlasIkon.png" id="2_vmiqc"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w4e36"]
+atlas = ExtResource("2_vmiqc")
+region = Rect2(0, 0, 64, 64)
+
+[resource]
+script = ExtResource("1_sev0u")
+name = "Silver Ring"
+description = "Stylish Ring"
+texture = SubResource("AtlasTexture_w4e36")
+metadata/_custom_type_script = "uid://b4kkypi5d850e"

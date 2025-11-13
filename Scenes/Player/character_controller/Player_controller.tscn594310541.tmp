@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://bs5cxi0sbahk2"]
+
+[ext_resource type="PackedScene" uid="uid://cfwyp1kljh03y" path="res://Scenes/Character Controller/Player.tscn" id="1_72f2a"]
+[ext_resource type="Script" uid="uid://b3kvdgcfcioud" path="res://Scripts/player_controller.gd" id="1_vqi2o"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_vqi2o"]
+radius = 0.3
+height = 1.2
+
+[node name="CharacterBody3D" type="CharacterBody3D"]
+script = ExtResource("1_vqi2o")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.600553, 0)
+shape = SubResource("CapsuleShape3D_vqi2o")
+
+[node name="WorldModel" type="Node3D" parent="."]
+
+[node name="Player" parent="WorldModel" instance=ExtResource("1_72f2a")]
+
+[node name="Head" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.08558, 0)

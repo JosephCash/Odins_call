@@ -1,0 +1,99 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://dke83au3yhrk"
+path="res://.godot/imported/Female_character_skeletalmesh.glb-a093d10781d4ea800a90bd252636011b.scn"
+
+[deps]
+
+source_file="res://Assets/GLB_Files/Female_character_skeletalmesh.glb"
+dest_files=["res://.godot/imported/Female_character_skeletalmesh.glb-a093d10781d4ea800a90bd252636011b.scn"]
+
+[params]
+
+nodes/root_type=""
+nodes/root_name=""
+nodes/root_script=null
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+nodes/import_as_skeleton_bones=false
+nodes/use_name_suffixes=true
+nodes/use_node_type_suffixes=true
+meshes/ensure_tangents=true
+meshes/generate_lods=true
+meshes/create_shadow_meshes=true
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+meshes/force_disable_compression=false
+skins/use_named_skins=true
+animation/import=true
+animation/fps=30
+animation/trimming=false
+animation/remove_immutable_tracks=true
+animation/import_rest_as_RESET=false
+import_script/path=""
+materials/extract=0
+materials/extract_format=0
+materials/extract_path=""
+_subresources={
+"meshes": {
+"Female_character_skeletalmesh_Plane_001": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://Assets/Resources/Mesh/FemaleCharacter/Legs.res",
+"save_to_file/path": "uid://b8g0l45hacclt"
+},
+"Female_character_skeletalmesh_Plane_002": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://Assets/Resources/Mesh/FemaleCharacter/Face.res",
+"save_to_file/path": "uid://bm0wji70up6ti"
+},
+"Female_character_skeletalmesh_Plane_004": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://Assets/Resources/Mesh/FemaleCharacter/Feet.res",
+"save_to_file/path": "uid://dvxong03ijk3"
+},
+"Female_character_skeletalmesh_Plane_006": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://Assets/Resources/Mesh/FemaleCharacter/Hands.res",
+"save_to_file/path": "uid://cd3fepispsib6"
+},
+"Female_character_skeletalmesh_Plane_009": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://Assets/Resources/Mesh/FemaleCharacter/head.res",
+"save_to_file/path": "uid://bhoa1m0sdbwtp"
+},
+"Female_character_skeletalmesh_Plane_011": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://Assets/Resources/Mesh/FemaleCharacter/Torso.res",
+"save_to_file/path": "uid://b1a3uyynttbug"
+}
+}
+}
+gltf/naming_version=2
+gltf/embedded_image_handling=1

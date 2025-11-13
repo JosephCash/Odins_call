@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemDataEquipHead" load_steps=4 format=3 uid="uid://c6w726tclwift"]
+
+[ext_resource type="Script" uid="uid://byu6nr1cwabgc" path="res://Scripts/Item/Item_data_equip_head.gd" id="1_hu4rv"]
+[ext_resource type="Texture2D" uid="uid://5vl4fcltjwi4" path="res://Assets/Resources/textures/Icon_atlas/Armor_AtlasIkon.png" id="2_1cmmr"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8ry1t"]
+atlas = ExtResource("2_1cmmr")
+region = Rect2(0, 0, 64, 64)
+
+[resource]
+script = ExtResource("1_hu4rv")
+defence = 1
+name = "Leather Headband"
+description = "Leather Headband of the north is mostly common in northern regions"
+texture = SubResource("AtlasTexture_8ry1t")
+metadata/_custom_type_script = "uid://byu6nr1cwabgc"

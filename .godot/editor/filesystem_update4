@@ -1,0 +1,9 @@
+res://Scenes/Player/character_controller/player.tscn
+res://Player_inventory/item/items/Health Potions/Small_health_potion.tres
+res://Player_inventory/item/items/Armor/Leather_set_of_the_north/Leather_headband_of_the_north.tres
+res://Player_inventory/item/items/Armor/Leather_set_of_the_north/Leather_tunic_of_the_north.tres
+res://Player_inventory/item/items/Armor/Leather_set_of_the_north/Leather_leggings_of_the_north.tres
+res://Player_inventory/item/items/Armor/Leather_set_of_the_north/Leather_armguards_of_the_north.tres
+res://Player_inventory/item/items/Armor/Leather_set_of_the_north/Leather_boots_of_the_north.tres
+res://Player_inventory/item/items/Trinkets/Silver_ring.tres
+res://Player_inventory/Player_inv.tres

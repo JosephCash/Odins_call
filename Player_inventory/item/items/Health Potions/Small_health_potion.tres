@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemDataConsumable" load_steps=4 format=3 uid="uid://dflfxmawj40gj"]
+
+[ext_resource type="Script" uid="uid://b3kpqg2skqih4" path="res://Scripts/Item/Item_data_consumable.gd" id="1_ap2p6"]
+[ext_resource type="Texture2D" uid="uid://dshywxrt5ybid" path="res://Assets/Resources/textures/Icon_atlas/Consumable_AtlasIkon.png" id="2_kkj0u"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jad8m"]
+atlas = ExtResource("2_kkj0u")
+region = Rect2(0, 0, 64, 64)
+
+[resource]
+script = ExtResource("1_ap2p6")
+heal_value = 1
+name = "Small Health Potion"
+description = "Heals Player"
+stackable = true
+texture = SubResource("AtlasTexture_jad8m")
+metadata/_custom_type_script = "uid://b3kpqg2skqih4"

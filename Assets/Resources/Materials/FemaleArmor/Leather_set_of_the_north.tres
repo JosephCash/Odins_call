@@ -1,0 +1,12 @@
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://c4uncgrn5fyv0"]
+
+[ext_resource type="Texture2D" uid="uid://cq8maebgnkdua" path="res://Assets/Resources/textures/FemaleArmor/Lether_set_of_the_north/t_female_character_armor_of_the_north.png" id="1_wld5j"]
+
+[resource]
+transparency = 2
+alpha_scissor_threshold = 0.5
+alpha_antialiasing_mode = 0
+depth_draw_mode = 1
+shading_mode = 0
+albedo_texture = ExtResource("1_wld5j")
+texture_filter = 2

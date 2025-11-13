@@ -1,0 +1,62 @@
+[gd_resource type="Resource" script_class="InventoryData" load_steps=19 format=3 uid="uid://ciaejmyvkfy8g"]
+
+[ext_resource type="Script" uid="uid://b2g8x81ldwlhr" path="res://Player_inventory/inventory/inventory_data.gd" id="1_p4vtu"]
+[ext_resource type="Script" uid="uid://cchjne1wf1r33" path="res://Player_inventory/inventory/slot_data.gd" id="2_fymc1"]
+[ext_resource type="Resource" uid="uid://dflfxmawj40gj" path="res://Player_inventory/item/items/Health Potions/Small_health_potion.tres" id="3_fymc1"]
+[ext_resource type="Resource" uid="uid://c6w726tclwift" path="res://Player_inventory/item/items/Armor/Leather_set_of_the_north/Leather_headband_of_the_north.tres" id="4_1xqi2"]
+[ext_resource type="Resource" uid="uid://2ev7nn8rjpsi" path="res://Player_inventory/item/items/Armor/Leather_set_of_the_north/Leather_tunic_of_the_north.tres" id="5_fbo2i"]
+[ext_resource type="Resource" uid="uid://cxm4kaxbpr3ta" path="res://Player_inventory/item/items/Armor/Leather_set_of_the_north/Leather_leggings_of_the_north.tres" id="6_3s2b0"]
+[ext_resource type="Resource" uid="uid://lx3wsjb22tb5" path="res://Player_inventory/item/items/Armor/Leather_set_of_the_north/Leather_armguards_of_the_north.tres" id="7_rulqb"]
+[ext_resource type="Resource" uid="uid://sq17f7s5kp0r" path="res://Player_inventory/item/items/Armor/Leather_set_of_the_north/Leather_boots_of_the_north.tres" id="8_6qtf4"]
+[ext_resource type="Resource" uid="uid://b047rq2wajn31" path="res://Player_inventory/item/items/Trinkets/Silver_ring.tres" id="9_7jis2"]
+
+[sub_resource type="Resource" id="Resource_lq0q8"]
+script = ExtResource("2_fymc1")
+item_data = ExtResource("3_fymc1")
+quantity = 19
+metadata/_custom_type_script = "uid://cchjne1wf1r33"
+
+[sub_resource type="Resource" id="Resource_yarbe"]
+script = ExtResource("2_fymc1")
+item_data = ExtResource("4_1xqi2")
+metadata/_custom_type_script = "uid://cchjne1wf1r33"
+
+[sub_resource type="Resource" id="Resource_mmyn2"]
+script = ExtResource("2_fymc1")
+item_data = ExtResource("5_fbo2i")
+metadata/_custom_type_script = "uid://cchjne1wf1r33"
+
+[sub_resource type="Resource" id="Resource_hx0u4"]
+script = ExtResource("2_fymc1")
+item_data = ExtResource("6_3s2b0")
+metadata/_custom_type_script = "uid://cchjne1wf1r33"
+
+[sub_resource type="Resource" id="Resource_7gnta"]
+script = ExtResource("2_fymc1")
+item_data = ExtResource("7_rulqb")
+metadata/_custom_type_script = "uid://cchjne1wf1r33"
+
+[sub_resource type="Resource" id="Resource_dyd7p"]
+script = ExtResource("2_fymc1")
+item_data = ExtResource("8_6qtf4")
+metadata/_custom_type_script = "uid://cchjne1wf1r33"
+
+[sub_resource type="Resource" id="Resource_24k85"]
+script = ExtResource("2_fymc1")
+item_data = ExtResource("9_7jis2")
+metadata/_custom_type_script = "uid://cchjne1wf1r33"
+
+[sub_resource type="Resource" id="Resource_4hc2q"]
+script = ExtResource("2_fymc1")
+item_data = ExtResource("9_7jis2")
+metadata/_custom_type_script = "uid://cchjne1wf1r33"
+
+[sub_resource type="Resource" id="Resource_dbhmn"]
+script = ExtResource("2_fymc1")
+item_data = ExtResource("9_7jis2")
+metadata/_custom_type_script = "uid://cchjne1wf1r33"
+
+[resource]
+script = ExtResource("1_p4vtu")
+slot_datas = Array[ExtResource("2_fymc1")]([SubResource("Resource_lq0q8"), SubResource("Resource_yarbe"), SubResource("Resource_mmyn2"), SubResource("Resource_hx0u4"), SubResource("Resource_7gnta"), SubResource("Resource_dyd7p"), SubResource("Resource_24k85"), SubResource("Resource_4hc2q"), SubResource("Resource_dbhmn"), null, null, null, null, null, null, null, null, null])
+metadata/_custom_type_script = "uid://b2g8x81ldwlhr"

@@ -1,0 +1,14 @@
+ItemDataEquipTrinket
+ItemDataEquipFeet
+ItemDataEquipHands
+ItemDataEquipLegs
+ItemDataEquipTorso
+ItemDataEquipHead
+InventoryDataEquipTorso
+ItemDataConsumable
+ItemData
+InventoryData
+AtlasTexture
+StandardMaterial3D
+Resource
+ImageTexture

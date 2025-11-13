@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemDataEquipHands" load_steps=4 format=3 uid="uid://lx3wsjb22tb5"]
+
+[ext_resource type="Script" uid="uid://cnn6eaifahamx" path="res://Scripts/Item/item_data_equip_hands.gd" id="1_od5sg"]
+[ext_resource type="Texture2D" uid="uid://5vl4fcltjwi4" path="res://Assets/Resources/textures/Icon_atlas/Armor_AtlasIkon.png" id="2_meokq"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_we3ak"]
+atlas = ExtResource("2_meokq")
+region = Rect2(256, 0, 64, 64)
+
+[resource]
+script = ExtResource("1_od5sg")
+name = "Leather_armguards"
+description = "Leather_armguards of the north is mostly common in northern regions"
+texture = SubResource("AtlasTexture_we3ak")
+metadata/_custom_type_script = "uid://cnn6eaifahamx"

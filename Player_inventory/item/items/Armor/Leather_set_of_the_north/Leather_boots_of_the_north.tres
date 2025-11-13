@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemDataEquipFeet" load_steps=4 format=3 uid="uid://sq17f7s5kp0r"]
+
+[ext_resource type="Script" uid="uid://cwjh733mtlrjk" path="res://Scripts/Item/item_data_equip_feet.gd" id="1_gicw2"]
+[ext_resource type="Texture2D" uid="uid://5vl4fcltjwi4" path="res://Assets/Resources/textures/Icon_atlas/Armor_AtlasIkon.png" id="2_ebg84"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rb63g"]
+atlas = ExtResource("2_ebg84")
+region = Rect2(192, 0, 64, 64)
+
+[resource]
+script = ExtResource("1_gicw2")
+name = "Leather Boots"
+description = "Leather Boots of the north is mostly common in northern regions"
+texture = SubResource("AtlasTexture_rb63g")
+metadata/_custom_type_script = "uid://cwjh733mtlrjk"

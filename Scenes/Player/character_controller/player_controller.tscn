@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://bs5cxi0sbahk2"]
+
+[ext_resource type="PackedScene" uid="uid://cfwyp1kljh03y" path="res://Scenes/Player/character_controller/player.tscn" id="1_72f2a"]
+[ext_resource type="Script" uid="uid://b3kvdgcfcioud" path="res://Scripts/Player/controllers/player_controller.gd" id="1_vqi2o"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_vqi2o"]
+radius = 0.3
+height = 1.67
+
+[node name="MainCharacter" type="CharacterBody3D"]
+script = ExtResource("1_vqi2o")
+
+[node name="CharacterColBox" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.83409065, 0)
+shape = SubResource("CapsuleShape3D_vqi2o")
+
+[node name="WorldModel" type="Node3D" parent="."]
+transform = Transform3D(0.9999999, 0, 0, 0, 0.9999999, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="Player" parent="WorldModel" instance=ExtResource("1_72f2a")]
+
+[node name="Head" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5097665, 0)

@@ -1,0 +1,8 @@
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://ddnw36nbv5gaw"]
+
+[ext_resource type="Texture2D" uid="uid://b64ocqsi4fqgi" path="res://Assets/Resources/textures/FemaleCharacter/Hair/t_female_hair1_white.png" id="1_1fh6y"]
+
+[resource]
+shading_mode = 0
+albedo_texture = ExtResource("1_1fh6y")
+texture_filter = 2

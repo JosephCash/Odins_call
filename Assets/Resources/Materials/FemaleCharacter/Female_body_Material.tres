@@ -1,6 +1,6 @@
 [gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://bdy3ydi7tqgoc"]
 
-[ext_resource type="Texture2D" uid="uid://cnmc0bpmmk026" path="res://Assets/Resources/textures/FemaleCharacter/t_female_characterbody_blonde.png" id="1_2k2qm"]
+[ext_resource type="Texture2D" uid="uid://cnmc0bpmmk026" path="res://Assets/Resources/textures/FemaleCharacter/body/t_female_characterbody_blonde.png" id="1_2k2qm"]
 
 [resource]
 shading_mode = 0

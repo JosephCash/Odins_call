@@ -1,7 +1,8 @@
+CollisionShape3D
+Jigglebone
 HBoxContainer
 MarginContainer
 PanelContainer
-Jigglebone
 ColorRect
 MeshInstance3D
 StaticBody3D
@@ -11,5 +12,3 @@ CanvasLayer
 GridContainer
 Label
 TextureRect
-CollisionShape3D
-Area3D

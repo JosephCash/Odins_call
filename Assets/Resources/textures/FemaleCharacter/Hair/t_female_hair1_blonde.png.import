@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dsad54ybnbsd7"
-path="res://.godot/imported/t_female_hair1_blonde.png-d65ade3182e0f9962cf34ff891060719.ctex"
+uid="uid://dalyx8slo8u77"
+path="res://.godot/imported/t_female_hair1_blonde.png-3e3e880ebad07c01b09e3ae1e238638d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Resources/textures/FemaleCharacter/t_female_hair1_blonde.png"
-dest_files=["res://.godot/imported/t_female_hair1_blonde.png-d65ade3182e0f9962cf34ff891060719.ctex"]
+source_file="res://Assets/Resources/textures/FemaleCharacter/Hair/t_female_hair1_blonde.png"
+dest_files=["res://.godot/imported/t_female_hair1_blonde.png-3e3e880ebad07c01b09e3ae1e238638d.ctex"]
 
 [params]
 
@@ -23,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

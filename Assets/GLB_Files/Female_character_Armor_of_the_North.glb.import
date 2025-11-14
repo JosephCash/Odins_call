@@ -3,7 +3,7 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://7wokbl2uefyj"
+uid="uid://bohllmuv1kry6"
 path="res://.godot/imported/Female_character_Armor_of_the_North.glb-d7b9f552306669b0fc1bc3505ae0ff90.scn"
 
 [deps]
@@ -39,50 +39,14 @@ materials/extract_format=0
 materials/extract_path=""
 _subresources={
 "meshes": {
-"Female_character_Armor_of_the_North_Plane_004": {
+"Female_character_Armor_of_the_North_Plane_001": {
 "generate/lightmap_uv": 0,
 "generate/lods": 0,
 "generate/shadow_meshes": 0,
 "lods/normal_merge_angle": 20.0,
 "save_to_file/enabled": true,
 "save_to_file/fallback_path": "res://Assets/Resources/Mesh/FemaleCharacter/Armor_of_the_north_female/Leather_tunic_of_the_north.res",
-"save_to_file/path": "uid://j6mnwsajblwa"
-},
-"Female_character_Armor_of_the_North_Plane_005": {
-"generate/lightmap_uv": 0,
-"generate/lods": 0,
-"generate/shadow_meshes": 0,
-"lods/normal_merge_angle": 20.0,
-"save_to_file/enabled": true,
-"save_to_file/fallback_path": "res://Assets/Resources/Mesh/FemaleCharacter/Armor_of_the_north_female/Leather_boots_of_the_north.res",
-"save_to_file/path": "uid://b8wkq1o87oor7"
-},
-"Female_character_Armor_of_the_North_Plane_007": {
-"generate/lightmap_uv": 0,
-"generate/lods": 0,
-"generate/shadow_meshes": 0,
-"lods/normal_merge_angle": 20.0,
-"save_to_file/enabled": true,
-"save_to_file/fallback_path": "res://Assets/Resources/Mesh/FemaleCharacter/Armor_of_the_north_female/Leather_leggins_of_the_north.res",
-"save_to_file/path": "uid://dfxyg31cnbn5d"
-},
-"Female_character_Armor_of_the_North_Plane_010": {
-"generate/lightmap_uv": 0,
-"generate/lods": 0,
-"generate/shadow_meshes": 0,
-"lods/normal_merge_angle": 20.0,
-"save_to_file/enabled": true,
-"save_to_file/fallback_path": "res://Assets/Resources/Mesh/FemaleCharacter/Armor_of_the_north_female/Leather_armguards_of_the_north.res",
-"save_to_file/path": "uid://df4wl2vc8ikvl"
-},
-"Female_character_Armor_of_the_North_Plane_012": {
-"generate/lightmap_uv": 0,
-"generate/lods": 0,
-"generate/shadow_meshes": 0,
-"lods/normal_merge_angle": 20.0,
-"save_to_file/enabled": true,
-"save_to_file/fallback_path": "res://Assets/Resources/Mesh/FemaleCharacter/Armor_of_the_north_female/Leather_headband_of_the_north.res",
-"save_to_file/path": "uid://b2o0kc7bqsm3o"
+"save_to_file/path": "uid://dllp1q627g48d"
 }
 }
 }

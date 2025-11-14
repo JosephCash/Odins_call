@@ -1,6 +1,8 @@
-[gd_resource type="Resource" script_class="ItemDataEquipFeet" load_steps=4 format=3 uid="uid://sq17f7s5kp0r"]
+[gd_resource type="Resource" script_class="ItemDataEquipFeet" load_steps=6 format=3 uid="uid://sq17f7s5kp0r"]
 
 [ext_resource type="Script" uid="uid://cwjh733mtlrjk" path="res://Scripts/Item/item_data_equip_feet.gd" id="1_gicw2"]
+[ext_resource type="Material" uid="uid://c4uncgrn5fyv0" path="res://Assets/Resources/Materials/FemaleArmor/Leather_set_of_the_north.tres" id="1_y4tog"]
+[ext_resource type="ArrayMesh" uid="uid://b8wkq1o87oor7" path="res://Assets/Resources/Mesh/FemaleCharacter/Armor_of_the_north_female/Leather_boots_of_the_north.res" id="2_bql1h"]
 [ext_resource type="Texture2D" uid="uid://5vl4fcltjwi4" path="res://Assets/Resources/textures/Icon_atlas/Armor_AtlasIkon.png" id="2_ebg84"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_rb63g"]
@@ -9,6 +11,8 @@ region = Rect2(192, 0, 64, 64)
 
 [resource]
 script = ExtResource("1_gicw2")
+mesh = ExtResource("2_bql1h")
+material = ExtResource("1_y4tog")
 name = "Leather Boots"
 description = "Leather Boots of the north is mostly common in northern regions"
 texture = SubResource("AtlasTexture_rb63g")

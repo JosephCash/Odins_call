@@ -14,12 +14,12 @@ var grounded: bool = false
 var jump_now: bool = false
 
 func _ready():
-	player = GameRefs.player as CharacterBody3D
+	player = PlayerManager.player as CharacterBody3D
 	state_machine_locomotion = %AnimationTree.get("parameters/Locomotion/playback") as AnimationNodeStateMachinePlayback
 
 func _physics_process(_delta: float) -> void:
 	if player == null:
-		player = GameRefs.player as CharacterBody3D
+		player = PlayerManager.player as CharacterBody3D
 		if player == null:
 			return  # jeszcze nie ma gracza – wyjdź z klatki
 	total_speed = player.velocity.length()

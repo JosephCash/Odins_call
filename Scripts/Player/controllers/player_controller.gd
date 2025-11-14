@@ -15,6 +15,7 @@ extends CharacterBody3D
 signal toggle_inventory()
 
 @onready var interact_ray: RayCast3D = $"../CameraController/InteractRay"
+@onready var player: Node3D = $WorldModel/Player
 
 # === STATYSTYKI POSTACI ===
 var health: int = 5
@@ -37,10 +38,13 @@ var wish_dir := Vector3.ZERO # Oczekiwany kierunek poruszania się
 
 # === READY ===
 func _ready():
-	GameRefs.player = self
 	PlayerManager.player = self
-
-
+	
+	equip_inventory_feet.inventory_updated.connect(_on_feet_inventory_updated)
+	equip_inventory_legs.inventory_updated.connect(_on_legs_inventory_updated)
+	equip_inventory_torso.inventory_updated.connect(_on_torso_inventory_updated)
+	equip_inventory_hands.inventory_updated.connect(_on_hands_inventory_updated)
+	equip_inventory_head.inventory_updated.connect(_on_head_inventory_updated)
 # === FUNKCJE POMOCNICZE ===
 func get_move_speed() -> float:
 	return walk_speed
@@ -172,3 +176,80 @@ func interact() -> void:
 
 func heal(heal_value: int) -> void:
 	health += heal_value
+	
+func _on_feet_inventory_updated(_inv) -> void:
+	_update_feet_visual()
+
+#UPDATE MESHY ZBROJI#
+
+func _update_feet_visual() -> void:
+	# bierzemy inventory stóp z MainCharacter
+	var feet_inventory = equip_inventory_feet
+
+	# zakładam, że jest tylko 1 slot w equip inventory stóp
+	var slot_data: SlotData = feet_inventory.slot_datas[0]
+
+	# jeśli w slocie jest item i jest typu ItemDataEquipFeet -> zakładamy go
+	if slot_data and slot_data.item_data is ItemDataEquipFeet:
+		var item: ItemDataEquipFeet = slot_data.item_data
+		player.apply_feet_item(item)
+	else:
+		# brak itemu w slocie -> wracamy do domyślnego mesha + materiału
+		player.apply_feet_item(null)
+		
+func _on_legs_inventory_updated(_inv) -> void:
+	_update_legs_visual()
+
+
+func _update_legs_visual() -> void:
+	var legs_inventory = equip_inventory_legs
+	var slot_data: SlotData = legs_inventory.slot_datas[0]
+
+	if slot_data and slot_data.item_data is ItemDataEquipLegs:
+		var item: ItemDataEquipLegs = slot_data.item_data
+		player.apply_legs_item(item)
+	else:
+		player.apply_legs_item(null)
+
+func _on_torso_inventory_updated(_inv) -> void:
+	_update_torso_visual()
+
+
+func _update_torso_visual() -> void:
+	var torso_inventory = equip_inventory_torso
+	var slot_data: SlotData = torso_inventory.slot_datas[0]
+
+	if slot_data and slot_data.item_data is ItemDataEquipTorso:
+		var item: ItemDataEquipTorso = slot_data.item_data
+		player.apply_torso_item(item)
+	else:
+		player.apply_torso_item(null)
+
+func _on_hands_inventory_updated(_inv) -> void:
+	_update_hands_visual()
+
+
+func _update_hands_visual() -> void:
+	var hands_inventory = equip_inventory_hands
+	var slot_data: SlotData = hands_inventory.slot_datas[0]
+
+	if slot_data and slot_data.item_data is ItemDataEquipHands:
+		var item: ItemDataEquipHands = slot_data.item_data
+		player.apply_hands_item(item)
+	else:
+		player.apply_hands_item(null)
+		
+
+func _on_head_inventory_updated(_inv) -> void:
+	_update_head_visual()
+
+
+func _update_head_visual() -> void:
+	var head_inventory = equip_inventory_head
+	var slot_data: SlotData = head_inventory.slot_datas[0]
+
+	if slot_data and slot_data.item_data is ItemDataEquipHead:
+		var item: ItemDataEquipHead = slot_data.item_data
+		player.apply_head_item(item)
+	else:
+		player.apply_head_item(null)

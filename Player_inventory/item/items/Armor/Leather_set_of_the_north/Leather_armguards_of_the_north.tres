@@ -1,6 +1,8 @@
-[gd_resource type="Resource" script_class="ItemDataEquipHands" load_steps=4 format=3 uid="uid://lx3wsjb22tb5"]
+[gd_resource type="Resource" script_class="ItemDataEquipHands" load_steps=6 format=3 uid="uid://lx3wsjb22tb5"]
 
 [ext_resource type="Script" uid="uid://cnn6eaifahamx" path="res://Scripts/Item/item_data_equip_hands.gd" id="1_od5sg"]
+[ext_resource type="Material" uid="uid://c4uncgrn5fyv0" path="res://Assets/Resources/Materials/FemaleArmor/Leather_set_of_the_north.tres" id="1_wodo1"]
+[ext_resource type="ArrayMesh" uid="uid://df4wl2vc8ikvl" path="res://Assets/Resources/Mesh/FemaleCharacter/Armor_of_the_north_female/Leather_armguards_of_the_north.res" id="2_5hlui"]
 [ext_resource type="Texture2D" uid="uid://5vl4fcltjwi4" path="res://Assets/Resources/textures/Icon_atlas/Armor_AtlasIkon.png" id="2_meokq"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_we3ak"]
@@ -9,6 +11,8 @@ region = Rect2(256, 0, 64, 64)
 
 [resource]
 script = ExtResource("1_od5sg")
+mesh = ExtResource("2_5hlui")
+material = ExtResource("1_wodo1")
 name = "Leather_armguards"
 description = "Leather_armguards of the north is mostly common in northern regions"
 texture = SubResource("AtlasTexture_we3ak")

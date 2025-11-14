@@ -1,3 +1,4 @@
+ItemDataConsumable
 ItemDataEquipTrinket
 ItemDataEquipFeet
 ItemDataEquipHands
@@ -5,7 +6,6 @@ ItemDataEquipLegs
 ItemDataEquipTorso
 ItemDataEquipHead
 InventoryDataEquipTorso
-ItemDataConsumable
 ItemData
 InventoryData
 AtlasTexture

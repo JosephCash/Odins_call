@@ -1,4 +1,6 @@
 res://Assets/Resources/Mesh/FemaleCharacter/Armor_of_the_north_female
+res://Player_inventory/item/items/Health Potions
+res://
 res://Player_inventory/item/items/Trinkets
 res://Player_inventory/item/items
 res://Scripts/Inventory
@@ -14,4 +16,3 @@ res://Assets/Resources/Mesh
 res://Assets/Resources/Animations
 res://Assets/Resources/Materials/FemaleCharacter
 res://Assets/Resources/Materials
-res://

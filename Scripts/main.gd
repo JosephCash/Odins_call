@@ -17,7 +17,7 @@ func _ready() -> void:
 	inventory_interface.set_equip_inventory_trinkets(main_character.equip_inventory_trinket1,main_character.equip_inventory_trinket2,main_character.equip_inventory_trinket3)
 
 	hot_bar_inventory.set_inventory_data(main_character.inventory_data)
-	
+
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 	for node in get_tree().get_nodes_in_group("external_inventory"):
@@ -38,3 +38,4 @@ func toggle_inventory_interface(external_inventory_owner = null) -> void:
 	else:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		hot_bar_inventory.show()
+		

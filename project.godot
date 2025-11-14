@@ -21,7 +21,6 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-GameRefs="*res://game_refs.gd"
 PlayerManager="*res://Scripts/Player/player_manager.gd"
 
 [display]

@@ -45,6 +45,8 @@ func _ready():
 	equip_inventory_torso.inventory_updated.connect(_on_torso_inventory_updated)
 	equip_inventory_hands.inventory_updated.connect(_on_hands_inventory_updated)
 	equip_inventory_head.inventory_updated.connect(_on_head_inventory_updated)
+	
+	print("hejka")
 # === FUNKCJE POMOCNICZE ===
 func get_move_speed() -> float:
 	return walk_speed
@@ -147,7 +149,7 @@ func _physics_process(delta: float) -> void:
 		move_dir = Vector3.ZERO
 
 	wish_dir = move_dir
-
+	
 	
 	# ===== SKOK + FIZYKA =====
 	if is_on_floor():

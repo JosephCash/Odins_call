@@ -1,4 +1,3 @@
-res://Scenes/Player/character_controller/player.tscn
 res://Player_inventory/item/items/Health Potions/Small_health_potion.tres
 res://Player_inventory/item/items/Armor/Leather_set_of_the_north/Leather_headband_of_the_north.tres
 res://Player_inventory/item/items/Armor/Leather_set_of_the_north/Leather_tunic_of_the_north.tres
@@ -8,11 +7,5 @@ res://Player_inventory/item/items/Armor/Leather_set_of_the_north/Leather_boots_o
 res://Player_inventory/item/items/Trinkets/Silver_ring.tres
 res://Player_inventory/item/items/Health Potions/Medium_health_potion.tres
 res://Player_inventory/Player_inv.tres
-res://Assets/Resources/Mesh/FemaleCharacter/Armor_of_the_north_female/Leather_tunic_of_the_north.res
-res://Assets/Resources/Materials/FemaleCharacter/Hair/Female_Hair1_blonde.tres
-res://Scenes/Player/character_controller/female_hair_1_skeletalmesh.tscn
-res://Assets/Resources/Materials/FemaleArmor/Leather_set_of_the_north.tres
-res://Assets/Resources/Materials/FemaleCharacter/Hair/Female_Hair1_black.tres
-res://Assets/Resources/Materials/FemaleCharacter/Hair/Female_Hair1_brown.tres
-res://Assets/Resources/Materials/FemaleCharacter/Hair/Female_Hair1_orange.tres
-res://Assets/Resources/Materials/FemaleCharacter/Hair/Female_Hair1_white.tres
+res://Scenes/UI/MainMenu.tscn
+res://Scripts/UI/MainMenu.gd

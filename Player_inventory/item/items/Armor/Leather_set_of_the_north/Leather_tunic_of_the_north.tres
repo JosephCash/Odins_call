@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://drye2yt0kry3t" path="res://Scripts/Item/item_data_equip_torso.gd" id="1_lrcpt"]
 [ext_resource type="Material" uid="uid://c4uncgrn5fyv0" path="res://Assets/Resources/Materials/FemaleArmor/Leather_set_of_the_north.tres" id="1_ufm3l"]
-[ext_resource type="ArrayMesh" uid="uid://td62v3s0nniv" path="res://Assets/Resources/Mesh/FemaleCharacter/Armor_of_the_north_female/Leather_tunic_of_the_north.res" id="2_8pmbg"]
+[ext_resource type="ArrayMesh" uid="uid://dllp1q627g48d" path="res://Assets/Resources/Mesh/FemaleCharacter/Armor_of_the_north_female/Leather_tunic_of_the_north.res" id="2_8pmbg"]
 [ext_resource type="Texture2D" uid="uid://5vl4fcltjwi4" path="res://Assets/Resources/textures/Icon_atlas/Armor_AtlasIkon.png" id="2_p7ipd"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_07tag"]

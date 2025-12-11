@@ -1,0 +1,77 @@
+[gd_scene load_steps=3 format=3 uid="uid://fs3oei8uyhtr"]
+
+[ext_resource type="Script" uid="uid://bdt8y7di0yt21" path="res://Scripts/UI/CharacterCreator.gd" id="1_ylvlj"]
+[ext_resource type="PackedScene" uid="uid://cfwyp1kljh03y" path="res://Scenes/Player/character_controller/player.tscn" id="2_65nj0"]
+
+[node name="CharacterCreation" type="Node3D"]
+script = ExtResource("1_ylvlj")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.9987856, 0.007764127, -0.04865248, 1.1956731e-09, 0.9875048, 0.15758938, 0.049268097, -0.157398, 0.98630553, -0.8303524, 1.2564567, 2.6550534)
+fov = 38.5
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.7490483, 0.19543615, -0.6330336, 0.08606291, 0.9187001, 0.38546523, 0.6569017, -0.34321278, 0.67133087, -2.4292421, 2.3029978, 2.7773588)
+
+[node name="PlayerPreview" parent="." instance=ExtResource("2_65nj0")]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Control" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="Panel" parent="CanvasLayer/Control"]
+layout_mode = 0
+offset_left = 158.0
+offset_top = 211.0
+offset_right = 556.0
+offset_bottom = 305.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/Control/Panel"]
+layout_mode = 0
+offset_left = 14.875
+offset_top = 10.465
+offset_right = 379.875
+offset_bottom = 68.465
+
+[node name="Label" type="Label" parent="CanvasLayer/Control/Panel/VBoxContainer"]
+layout_mode = 2
+text = "Hair Color"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/Control/Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="BtnBlonde" type="Button" parent="CanvasLayer/Control/Panel/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Blonde"
+
+[node name="BtnBlack" type="Button" parent="CanvasLayer/Control/Panel/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Black
+"
+
+[node name="BtnBrown" type="Button" parent="CanvasLayer/Control/Panel/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Brown"
+
+[node name="BtnOrange" type="Button" parent="CanvasLayer/Control/Panel/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Orange"
+
+[node name="BtnWhite" type="Button" parent="CanvasLayer/Control/Panel/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "White"
+
+[node name="HSeparator" type="HSeparator" parent="CanvasLayer/Control/Panel/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="BtnStart" type="Button" parent="CanvasLayer/Control/Panel/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Start"

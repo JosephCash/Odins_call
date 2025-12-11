@@ -1,0 +1,57 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://cfbg48gy68avb"]
+
+[ext_resource type="Texture2D" uid="uid://cnexaltucra5l" path="res://Assets/Resources/textures/FemaleCharacter/Face/t_female_face_normal.png" id="1_kjhp1"]
+
+[sub_resource type="Shader" id="Shader_kjhp1"]
+code = "shader_type spatial;
+// Zostawiamy 'unshaded', tak jak w Twoim oryginale - brak cieniowania
+render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx, unshaded;
+
+uniform vec4 albedo : source_color;
+uniform sampler2D texture_albedo : source_color, filter_nearest_mipmap, repeat_enable;
+
+// --- SEKCJA BRWI ---
+uniform vec4 original_eyebrow_color : source_color; // Kolor do znalezienia (np. brązowy)
+uniform vec4 new_eyebrow_color : source_color;      // Kolor docelowy
+uniform float sensitivity : hint_range(0.0, 1.0) = 0.2; // Tolerancja
+// -------------------
+
+uniform vec3 uv1_scale;
+uniform vec3 uv1_offset;
+
+void vertex() {
+	UV = UV * uv1_scale.xy + uv1_offset.xy;
+}
+
+void fragment() {
+	vec2 base_uv = UV;
+	vec4 albedo_tex = texture(texture_albedo, base_uv);
+
+	// Bazowy kolor
+	vec3 final_color = albedo.rgb * albedo_tex.rgb;
+
+	// --- LOGIKA ZAMIANY KOLORU ---
+	// Sprawdzamy, jak bardzo kolor piksela różni się od koloru brwi
+	float diff = distance(final_color, original_eyebrow_color.rgb);
+
+	// Tworzymy maskę: 1.0 tam gdzie kolor pasuje, 0.0 gdzie nie pasuje
+	float mask = 1.0 - step(sensitivity, diff);
+
+	// Podmieniamy kolor w miejscu maski
+	final_color = mix(final_color, new_eyebrow_color.rgb, mask);
+	// -----------------------------
+
+	ALBEDO = final_color;
+	ALPHA = albedo.a * albedo_tex.a;
+}"
+
+[resource]
+render_priority = 0
+shader = SubResource("Shader_kjhp1")
+shader_parameter/albedo = Color(1, 1, 1, 1)
+shader_parameter/texture_albedo = ExtResource("1_kjhp1")
+shader_parameter/original_eyebrow_color = Color(0.6784314, 0.46666667, 0.34117648, 1)
+shader_parameter/new_eyebrow_color = Color(0.6784314, 0.46666667, 0.34117648, 1)
+shader_parameter/sensitivity = 0.030000001425
+shader_parameter/uv1_scale = Vector3(1, 1, 1)
+shader_parameter/uv1_offset = Vector3(0, 0, 0)

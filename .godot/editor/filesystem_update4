@@ -9,3 +9,12 @@ res://Player_inventory/item/items/Health Potions/Medium_health_potion.tres
 res://Player_inventory/Player_inv.tres
 res://Scenes/UI/MainMenu.tscn
 res://Scripts/UI/MainMenu.gd
+res://Scripts/Player/player_manager.gd
+res://Scripts/Player/controllers/player_mesh_controller.gd
+res://Scenes/UI/CharacterCreation.tscn
+res://Scripts/UI/CharacterCreator.gd
+res://Scenes/Player/character_controller/player.tscn
+res://Assets/Resources/Materials/FemaleCharacter/Female_face_ShaderMaterial.tres
+res://Scripts/Player/controllers/face_texture_change.gd
+res://Scenes/Player/character_controller/female_hair_1_skeletalmesh.tscn
+res://Assets/Resources/Materials/FemaleCharacter/Hair/Female_Hair1_blonde.tres

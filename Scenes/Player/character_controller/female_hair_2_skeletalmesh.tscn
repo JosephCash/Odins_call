@@ -10,7 +10,7 @@
 surface_material_override/0 = ExtResource("2_af5i4")
 
 [node name="Jigglebone" type="Node3D" parent="Hair2_Armature/Skeleton3D" index="1"]
-transform = Transform3D(-0.9999609, -0.008867992, 1.471054e-07, 0.008867989, -0.99996114, -8.93839e-08, 1.4789228e-07, -8.8075886e-08, 1.0000002, 0.09639472, -0.86594856, 0.033848125)
+transform = Transform3D(-0.9999609, -0.008870233, 1.4710525e-07, 0.00887023, -0.99996114, -8.9397474e-08, 1.4789245e-07, -8.8089116e-08, 1.0000002, 0.09639472, -0.86594856, 0.033848125)
 top_level = true
 script = ExtResource("3_rflg8")
 bone_name = "Bone.007"
@@ -21,7 +21,7 @@ forward_axis = 1
 metadata/_custom_type_script = "uid://cxo3krs0ltet0"
 
 [node name="Jigglebone2" type="Node3D" parent="Hair2_Armature/Skeleton3D" index="2"]
-transform = Transform3D(-0.99999046, -0.004432974, -1.1591984e-07, 0.0044329725, -0.9999907, 6.302968e-08, -1.161981e-07, 6.2515205e-08, 1.0000002, 0.09590977, -0.9206227, 0.03384814)
+transform = Transform3D(-0.99999046, -0.0044344678, -1.1591475e-07, 0.0044344664, -0.9999907, 6.385218e-08, -1.16196766e-07, 6.3337545e-08, 1.0000002, 0.09590977, -0.9206227, 0.03384814)
 top_level = true
 script = ExtResource("3_rflg8")
 bone_name = "Bone.008"
@@ -32,7 +32,7 @@ forward_axis = 1
 metadata/_custom_type_script = "uid://cxo3krs0ltet0"
 
 [node name="Jigglebone3" type="Node3D" parent="Hair2_Armature/Skeleton3D" index="3"]
-transform = Transform3D(-0.99999785, -0.0022227187, -1.9451701e-07, 0.002222718, -0.9999981, -4.322227e-08, -1.9442047e-07, -4.365453e-08, 1.0000002, 0.095667355, -0.9752984, 0.03384812)
+transform = Transform3D(-0.99999785, -0.0022237145, -1.9451342e-07, 0.0022237138, -0.9999981, -4.246937e-08, -1.9441849e-07, -4.2901817e-08, 1.0000002, 0.095667355, -0.9752984, 0.03384812)
 top_level = true
 script = ExtResource("3_rflg8")
 bone_name = "Bone.009"
@@ -43,7 +43,7 @@ forward_axis = 1
 metadata/_custom_type_script = "uid://cxo3krs0ltet0"
 
 [node name="Jigglebone4" type="Node3D" parent="Hair2_Armature/Skeleton3D" index="4"]
-transform = Transform3D(-0.999979, 0.006512079, -5.6919568e-08, -0.006512077, -0.99997926, -1.6587258e-07, -5.7998534e-08, -1.6549845e-07, 1.0000002, -0.095044315, -0.8659426, 0.033848125)
+transform = Transform3D(-0.999979, 0.0065100444, -5.692002e-08, -0.0065100426, -0.99997926, -1.6578832e-07, -5.7998104e-08, -1.654143e-07, 1.0000002, -0.095044315, -0.8659426, 0.033848125)
 top_level = true
 script = ExtResource("3_rflg8")
 bone_name = "Bone.010"
@@ -54,7 +54,7 @@ forward_axis = 1
 metadata/_custom_type_script = "uid://cxo3krs0ltet0"
 
 [node name="Jigglebone5" type="Node3D" parent="Hair2_Armature/Skeleton3D" index="5"]
-transform = Transform3D(-0.999995, 0.0032548702, -1.9435342e-07, -0.0032548693, -0.99999523, 5.0356103e-08, -1.9418849e-07, 5.0988444e-08, 1.0000002, -0.094688326, -0.9206177, 0.033848125)
+transform = Transform3D(-0.999995, 0.0032530052, -1.9435682e-07, -0.0032530043, -0.99999523, 5.1236636e-08, -1.9418913e-07, 5.186862e-08, 1.0000002, -0.094688326, -0.9206177, 0.033848125)
 top_level = true
 script = ExtResource("3_rflg8")
 bone_name = "Bone.011"
@@ -65,7 +65,7 @@ forward_axis = 1
 metadata/_custom_type_script = "uid://cxo3krs0ltet0"
 
 [node name="Jigglebone6" type="Node3D" parent="Hair2_Armature/Skeleton3D" index="6"]
-transform = Transform3D(-0.9999988, 0.0016350739, -1.8905143e-07, -0.0016350735, -0.99999905, -4.179988e-08, -1.8911953e-07, -4.149072e-08, 1.0000002, -0.09451041, -0.9752937, 0.033848125)
+transform = Transform3D(-0.9999988, 0.0016334915, -1.8905179e-07, -0.001633491, -0.99999905, -4.262503e-08, -1.8912117e-07, -4.2316167e-08, 1.0000002, -0.09451043, -0.9752937, 0.033848125)
 top_level = true
 script = ExtResource("3_rflg8")
 bone_name = "Bone.012"
@@ -131,7 +131,7 @@ forward_axis = 1
 metadata/_custom_type_script = "uid://cxo3krs0ltet0"
 
 [node name="Jigglebone12" type="Node3D" parent="Hair2_Armature/Skeleton3D" index="12"]
-transform = Transform3D(-0.99832034, -0.05601948, -0.014809018, 0.05725338, -0.99300146, -0.10330056, -0.00891853, -0.10397489, 0.99454015, -0.071753025, -0.91821814, -0.071556516)
+transform = Transform3D(-0.99832034, -0.056019392, -0.014809008, 0.057253283, -0.99300146, -0.10330038, -0.008918541, -0.103974715, 0.9945402, -0.071753025, -0.91821814, -0.071556516)
 top_level = true
 script = ExtResource("3_rflg8")
 bone_name = "Bone.005"
@@ -142,7 +142,7 @@ forward_axis = 1
 metadata/_custom_type_script = "uid://cxo3krs0ltet0"
 
 [node name="Jigglebone13" type="Node3D" parent="Hair2_Armature/Skeleton3D" index="13"]
-transform = Transform3D(-0.9996065, 0.028058369, -0.000730845, -0.028058346, -0.9982492, 0.052078437, 0.00073167053, 0.052078437, 0.998643, -0.07731737, -1.0168526, -0.08188429)
+transform = Transform3D(-0.9996065, 0.028058428, -0.0007308498, -0.028058406, -0.9982492, 0.052078553, 0.000731672, 0.052078553, 0.998643, -0.07731737, -1.0168526, -0.08188429)
 top_level = true
 script = ExtResource("3_rflg8")
 bone_name = "Bone.006"

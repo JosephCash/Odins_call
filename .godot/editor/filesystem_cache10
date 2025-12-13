@@ -60,12 +60,12 @@ t_female_character_armor_of_the_north.png::CompressedTexture2D::7255940523694699
 ::res://Assets/Resources/textures/FemaleCharacter/::1765294407
 ::res://Assets/Resources/textures/FemaleCharacter/body/::1765294407
 t_female_characterbody_blonde.png::CompressedTexture2D::5710235022819596137::1765294372::1765294372::1::::<><><>0<>0<>bf3f725face7ba935587d71e776483f3<>res://.godot/imported/t_female_characterbody_blonde.png-2b8ba3885cad773e004be2f603226de8.ctex::
-::res://Assets/Resources/textures/FemaleCharacter/Face/::1765294407
+::res://Assets/Resources/textures/FemaleCharacter/Face/::1765632625
 t_female_face_angry.png::CompressedTexture2D::2538672509877414014::1765294372::1765294372::1::::<><><>0<>0<>004ebc84e971caeae21a0913a8d90f39<>res://.godot/imported/t_female_face_angry.png-ed7df9c4434cde16102fa5aec0a71745.ctex::
 t_female_face_closedeyes.png::CompressedTexture2D::3400531743222872306::1765294372::1765294372::1::::<><><>0<>0<>ff9490f5e1a8a93dad78e1284ec760e4<>res://.godot/imported/t_female_face_closedeyes.png-b15ec95706a275e307ab825847cf6bdd.ctex::
-t_female_face_normal.png::CompressedTexture2D::5694950944550676719::1765294372::1765294372::1::::<><><>0<>0<>75271881901c6d8bb2a357e3359e5148<>res://.godot/imported/t_female_face_normal.png-d8b803bcfbc27cfc6484337e21ba8ad9.ctex::
+t_female_face_normal.png::CompressedTexture2D::5694950944550676719::1765632720::1765632723::1::::<><><>0<>0<>75271881901c6d8bb2a357e3359e5148<>res://.godot/imported/t_female_face_normal.png-d8b803bcfbc27cfc6484337e21ba8ad9.ctex::
 t_female_face_scream.png::CompressedTexture2D::8281074897094610130::1765294372::1765294372::1::::<><><>0<>0<>3493db78fdb8af5e613e3a24eed84b5c<>res://.godot/imported/t_female_face_scream.png-d657e4668bb55292617974eb5742ffe6.ctex::
-::res://Assets/Resources/textures/FemaleCharacter/Hair/::1765629868
+::res://Assets/Resources/textures/FemaleCharacter/Hair/::1765629919
 t_female_hair1_black.png::CompressedTexture2D::2692922858409937245::1765294372::1765294372::1::::<><><>0<>0<>1ef2cd9151666ffa3c3dd29876a8b898<>res://.godot/imported/t_female_hair1_black.png-b66910930f281b528e9dd02951beab01.ctex::
 t_female_hair1_blonde.png::CompressedTexture2D::7183470249057022328::1765294372::1765294372::1::::<><><>0<>0<>50ce819b0f336376dd8217a06a4908c5<>res://.godot/imported/t_female_hair1_blonde.png-3e3e880ebad07c01b09e3ae1e238638d.ctex::
 t_female_hair1_brown.png::CompressedTexture2D::987097932837248117::1765294372::1765294372::1::::<><><>0<>0<>b1e2923f5c183189c83674abfdf4675b<>res://.godot/imported/t_female_hair1_brown.png-6c8e48c1605b3ad08e4acd1afdacf48a.ctex::

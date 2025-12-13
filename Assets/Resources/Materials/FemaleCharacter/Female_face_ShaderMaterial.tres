@@ -4,20 +4,45 @@
 
 [sub_resource type="Shader" id="Shader_kjhp1"]
 code = "shader_type spatial;
-// Zostawiamy 'unshaded', tak jak w Twoim oryginale - brak cieniowania
 render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx, unshaded;
 
 uniform vec4 albedo : source_color;
 uniform sampler2D texture_albedo : source_color, filter_nearest_mipmap, repeat_enable;
 
-// --- SEKCJA BRWI ---
-uniform vec4 original_eyebrow_color : source_color; // Kolor do znalezienia (np. brązowy)
-uniform vec4 new_eyebrow_color : source_color;      // Kolor docelowy
-uniform float sensitivity : hint_range(0.0, 1.0) = 0.2; // Tolerancja
-// -------------------
+// --- SEKCJA BRWI (Twoja istniejąca) ---
+uniform vec4 original_eyebrow_color : source_color; 
+uniform vec4 new_eyebrow_color : source_color;      
+uniform float eyebrow_sensitivity : hint_range(0.0, 1.0) = 0.2; 
+// --------------------------------------
+
+// --- SEKCJA OCZU (Nowa) ---
+uniform vec4 original_eye_color : source_color;           // Kolor tęczówki do wykrycia (pipeta)
+uniform float eye_sensitivity : hint_range(0.0, 1.0) = 0.15; // Tolerancja (żeby nie złapać skóry)
+uniform float eye_hue_shift : hint_range(-1.0, 1.0) = 0.0;   // Zmiana barwy
+uniform float eye_sat_shift : hint_range(-1.0, 1.0) = 0.0;   // Zmiana nasycenia
+uniform float eye_val_shift : hint_range(-1.0, 1.0) = 0.0;   // Zmiana jasności
+// --------------------------
 
 uniform vec3 uv1_scale;
 uniform vec3 uv1_offset;
+
+// --- FUNKCJE RGB <-> HSV ---
+vec3 rgb2hsv(vec3 c) {
+    vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+    vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+    vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+
+    float d = q.x - min(q.w, q.y);
+    float e = 1.0e-10;
+    return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+}
+
+vec3 hsv2rgb(vec3 c) {
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+// ---------------------------
 
 void vertex() {
 	UV = UV * uv1_scale.xy + uv1_offset.xy;
@@ -26,19 +51,33 @@ void vertex() {
 void fragment() {
 	vec2 base_uv = UV;
 	vec4 albedo_tex = texture(texture_albedo, base_uv);
-
-	// Bazowy kolor
 	vec3 final_color = albedo.rgb * albedo_tex.rgb;
 
-	// --- LOGIKA ZAMIANY KOLORU ---
-	// Sprawdzamy, jak bardzo kolor piksela różni się od koloru brwi
-	float diff = distance(final_color, original_eyebrow_color.rgb);
+	// --- 1. ZMIANA KOLORU OCZU (HSV) ---
+	// Sprawdzamy, czy piksel należy do oka
+	float eye_dist = distance(final_color, original_eye_color.rgb);
+	float eye_mask = 1.0 - step(eye_sensitivity, eye_dist);
 
-	// Tworzymy maskę: 1.0 tam gdzie kolor pasuje, 0.0 gdzie nie pasuje
-	float mask = 1.0 - step(sensitivity, diff);
+	if (eye_mask > 0.01) {
+		vec3 hsv = rgb2hsv(final_color);
+		
+		// Przesuwamy wartości
+		hsv.x += eye_hue_shift; // Hue
+		hsv.y = clamp(hsv.y + eye_sat_shift, 0.0, 1.0); // Saturation
+		hsv.z = clamp(hsv.z + eye_val_shift, 0.0, 1.0); // Value
+		
+		vec3 shifted_color = hsv2rgb(hsv);
+		final_color = mix(final_color, shifted_color, eye_mask);
+	}
+	// -----------------------------------
 
-	// Podmieniamy kolor w miejscu maski
-	final_color = mix(final_color, new_eyebrow_color.rgb, mask);
+	// --- 2. ZMIANA KOLORU BRWI ---
+	// Pobieramy surowy kolor ponownie dla precyzji maski brwi
+	vec3 raw_color = albedo.rgb * albedo_tex.rgb;
+	float brow_dist = distance(raw_color, original_eyebrow_color.rgb);
+	float brow_mask = 1.0 - step(eyebrow_sensitivity, brow_dist);
+	
+	final_color = mix(final_color, new_eyebrow_color.rgb, brow_mask);
 	// -----------------------------
 
 	ALBEDO = final_color;
@@ -52,6 +91,11 @@ shader_parameter/albedo = Color(1, 1, 1, 1)
 shader_parameter/texture_albedo = ExtResource("1_kjhp1")
 shader_parameter/original_eyebrow_color = Color(0.6784314, 0.46666667, 0.34117648, 1)
 shader_parameter/new_eyebrow_color = Color(0.6784314, 0.46666667, 0.34117648, 1)
-shader_parameter/sensitivity = 0.030000001425
+shader_parameter/eyebrow_sensitivity = 0.01200000057
+shader_parameter/original_eye_color = Color(0.14418128, 0.38599244, 0.99995476, 1)
+shader_parameter/eye_sensitivity = 0.9030000428925
+shader_parameter/eye_hue_shift = -0.549999978625
+shader_parameter/eye_sat_shift = 0.0340000491150001
+shader_parameter/eye_val_shift = -0.22099996299750002
 shader_parameter/uv1_scale = Vector3(1, 1, 1)
 shader_parameter/uv1_offset = Vector3(0, 0, 0)

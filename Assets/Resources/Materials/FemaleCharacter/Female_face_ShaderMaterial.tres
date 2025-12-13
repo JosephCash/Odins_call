@@ -96,6 +96,6 @@ shader_parameter/original_eye_color = Color(0.14418128, 0.38599244, 0.99995476, 
 shader_parameter/eye_sensitivity = 0.9030000428925
 shader_parameter/eye_hue_shift = -0.549999978625
 shader_parameter/eye_sat_shift = 0.0340000491150001
-shader_parameter/eye_val_shift = -0.22099996299750002
+shader_parameter/eye_val_shift = -0.2209999629975
 shader_parameter/uv1_scale = Vector3(1, 1, 1)
 shader_parameter/uv1_offset = Vector3(0, 0, 0)

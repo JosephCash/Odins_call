@@ -3,102 +3,114 @@ extends Node3D
 # Referencja do instancji gracza w scenie
 @onready var player_preview = $PlayerPreview
 
-# --- USTAWIENIA OBRACANIA ---
-@export var rotation_sensitivity: float = 0.005 # Czułość obrotu myszką
-var is_dragging: bool = false # Czy gracz trzyma lewy przycisk myszy
+# --- PRZYCISKI (PRZYPISZ JE W INSPEKTORZE!) ---
+@export_group("UI References")
+@export var btn_hair_next: Button  # Przeciągnij tu przycisk Next
+@export var btn_hair_prev: Button  # Przeciągnij tu przycisk Prev
+@export var btn_start: Button      # Przeciągnij tu przycisk Start
 
-# Ustawienia początkowe postaci
+# Opcjonalnie kolory (jeśli chcesz je też ręcznie, lub zostawiamy szukanie)
+# Dla uproszczenia zostawiam starą metodę szukania kolorów, bo ona chyba działała?
+
+# --- USTAWIENIA OBRACANIA ---
+@export var rotation_sensitivity: float = 0.005
+var is_dragging: bool = false 
+
 var current_settings = {
 	"gender": "female",
-	"hair_color_id": "blonde"
+	"hair_color_id": "blonde",
+	"hair_type": 1
 }
 
 func _ready():
-	# 1. Pokaż kursor myszy
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	
-	# 2. Inicjalizacja wyglądu na start (czekamy klatkę, aż scena się załaduje)
+	# Czekamy klatkę na załadowanie
 	await get_tree().process_frame
-	_update_preview()
 	
-	# 3. Automatyczne podpinanie przycisków
-	var btn_container = $CanvasLayer/Control/Panel/VBoxContainer/HBoxContainer
+	# --- DIAGNOSTYKA I PODPINANIE ---
+	print("--- INICJALIZACJA KREATORA ---")
 	
-	if btn_container:
-		if btn_container.has_node("BtnBlonde"): 
-			btn_container.get_node("BtnBlonde").pressed.connect(func(): _on_color_selected("blonde"))
+	if btn_hair_next:
+		btn_hair_next.pressed.connect(_on_hair_next_pressed)
+		print("Przycisk Hair Next: PODPIĘTY")
+	else:
+		printerr("BŁĄD: Nie przypisano przycisku btn_hair_next w Inspektorze!")
+
+	if btn_hair_prev:
+		btn_hair_prev.pressed.connect(_on_hair_prev_pressed)
+		print("Przycisk Hair Prev: PODPIĘTY")
+	else:
+		printerr("BŁĄD: Nie przypisano przycisku btn_hair_prev w Inspektorze!")
 		
-		if btn_container.has_node("BtnBlack"): 
-			btn_container.get_node("BtnBlack").pressed.connect(func(): _on_color_selected("black"))
-			
-		if btn_container.has_node("BtnBrown"): 
-			btn_container.get_node("BtnBrown").pressed.connect(func(): _on_color_selected("brown"))
-			
-		if btn_container.has_node("BtnOrange"): 
-			btn_container.get_node("BtnOrange").pressed.connect(func(): _on_color_selected("orange"))
-			
-		if btn_container.has_node("BtnWhite"): 
-			btn_container.get_node("BtnWhite").pressed.connect(func(): _on_color_selected("white"))
+	if btn_start:
+		btn_start.pressed.connect(_on_start_game_pressed)
 	
-	# Podpięcie przycisku Start
-	# Szukamy przycisku Start w kontenerze pionowym lub bezpośrednio w Panelu, zależnie od Twojej struktury
-	# Tutaj szukam rekurencyjnie lub po konkretnej ścieżce
-	var start_btn = $CanvasLayer/Control/Panel/VBoxContainer/HBoxContainer/BtnStart
-	if start_btn:
-		start_btn.pressed.connect(_on_start_game_pressed)
+	# Podpinanie kolorów (stara metoda - jeśli działała, to zostawiamy)
+	var ui_root = $CanvasLayer/Control/Panel/VBoxContainer/HBoxContainer
+	if ui_root:
+		for child in ui_root.get_children():
+			if child is Button and child.name.begins_with("Btn"):
+				# Wyciągamy kolor z nazwy np. BtnBlonde -> blonde
+				var color_name = child.name.replace("Btn", "").to_lower()
+				# Ignorujemy przyciski nawigacji jeśli są w tym samym kontenerze
+				if "hair" in color_name or "start" in color_name:
+					continue
+				
+				child.pressed.connect(func(): _on_color_selected(color_name))
+
+	_update_preview()
 
 
-# --- OBRACANIE POSTACI (NOWE) ---
+# --- OBSŁUGA KLIKNIĘĆ ---
 
-func _unhandled_input(event: InputEvent) -> void:
-	# Sprawdzamy kliknięcie myszką (LPM)
-	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			is_dragging = event.pressed # True jak wciśnięty, False jak puszczony
+func _on_hair_next_pressed():
+	print("KLIKNIĘTO: Następna fryzura")
+	current_settings["hair_type"] += 1
+	if current_settings["hair_type"] > 2: 
+		current_settings["hair_type"] = 1
+	_update_preview()
 
-	# Sprawdzamy ruch myszką, ale tylko gdy trzymamy przycisk
-	if event is InputEventMouseMotion and is_dragging:
-		# Obracamy postać wokół osi Y (pionowej)
-		# event.relative.x to różnica ruchu myszy w poziomie
-		player_preview.rotate_y(event.relative.x * rotation_sensitivity)
-
-
-# --- LOGIKA ZMIANY KOLORU ---
+func _on_hair_prev_pressed():
+	print("KLIKNIĘTO: Poprzednia fryzura")
+	current_settings["hair_type"] -= 1
+	if current_settings["hair_type"] < 1:
+		current_settings["hair_type"] = 2
+	_update_preview()
 
 func _on_color_selected(color_id: String):
-	print("Wybrano kolor: ", color_id)
+	print("KLIKNIĘTO: Kolor ", color_id)
 	current_settings["hair_color_id"] = color_id
 	_update_preview()
 
+func _on_start_game_pressed():
+	print("Start gry!")
+	PlayerManager.set_appearance_data(current_settings)
+	get_tree().change_scene_to_file("res://Scenes/world/test_world.tscn")
+
+# --- AKTUALIZACJA POSTACI ---
+
 func _update_preview():
+	print("Aktualizuję wygląd: ", current_settings)
 	var mesh_controller = _find_mesh_controller(player_preview)
 	
 	if mesh_controller:
 		mesh_controller.apply_appearance(current_settings)
 	else:
-		# Jeśli nie znaleziono, spróbujmy znaleźć ręcznie (zabezpieczenie)
-		# Czasami struktura jest inna po instancjonowaniu
-		pass
+		printerr("BŁĄD: Nie znaleziono skryptu player_mesh_controller na postaci!")
 
-# Funkcja pomocnicza do szukania kontrolera
+# --- FUNKCJE POMOCNICZE ---
+
 func _find_mesh_controller(node: Node) -> Node:
 	if node.has_method("apply_appearance"):
 		return node
-	
 	for child in node.get_children():
 		var result = _find_mesh_controller(child)
-		if result:
-			return result
+		if result: return result
 	return null
 
-
-# --- ZATWIERDZENIE I START ---
-
-func _on_start_game_pressed():
-	print("Start gry z ustawieniami: ", current_settings)
-	
-	# 1. Zapisz dane
-	PlayerManager.set_appearance_data(current_settings)
-	
-	# 2. Przełącz scenę (Poprawiona ścieżka bez "Odins_call/")
-	get_tree().change_scene_to_file("res://Scenes/world/test_world.tscn")
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		is_dragging = event.pressed
+	if event is InputEventMouseMotion and is_dragging:
+		player_preview.rotate_y(event.relative.x * rotation_sensitivity)

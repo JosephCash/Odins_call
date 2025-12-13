@@ -1,3 +1,5 @@
+Node3D
+Jigglebone
 Button
 HSeparator
 HBoxContainer
@@ -6,9 +8,7 @@ VBoxContainer
 Panel
 Control
 CanvasLayer
-Node3D
 DirectionalLight3D
 Camera3D
 ColorRect
 CollisionShape3D
-Jigglebone

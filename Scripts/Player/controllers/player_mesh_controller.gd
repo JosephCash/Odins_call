@@ -33,8 +33,14 @@ var default_head_material: Material
 # 1. TWARZ: Przypisz tutaj obiekt, który ma materiał twarzy (ShaderMaterial)
 @export var face_mesh_ref: MeshInstance3D 
 
-# 2. WŁOSY: Przypisz tutaj obiekt włosów
-@export var hair_mesh: MeshInstance3D 
+# 2. PUNKT ZACZEPIENIA WŁOSÓW (To jest BoneAttachment3D wewnątrz szkieletu)
+@export var hair_attachment_point: Node3D
+
+# 3. LISTA SCEN Z WŁOSAMI (Przypisz tutaj pliki .tscn w inspektorze)
+@export var hair_scenes: Array[PackedScene]
+
+# Aktualna referencja do mesha włosów (do zmiany koloru) - ustawiana dynamicznie przez skrypt
+var hair_mesh: MeshInstance3D 
 
 
 # --- USTAWIENIA KOSMETYCZNE ---
@@ -67,6 +73,11 @@ func _ready() -> void:
 	default_head_mesh = head_mesh.mesh
 	default_head_material = head_mesh.get_active_material(0)
 
+	# Znajdź istniejące włosy na starcie (jeśli są już w scenie jako dziecko BoneAttachment3D)
+	if hair_attachment_point and hair_attachment_point.get_child_count() > 0:
+		var current_hair_node = hair_attachment_point.get_child(0)
+		hair_mesh = _find_mesh_recursive(current_hair_node, "Hair")
+
 	# Aplikacja wyglądu startowego
 	apply_appearance(PlayerManager.get_appearance_data())
 
@@ -77,21 +88,63 @@ func apply_appearance(data: Dictionary) -> void:
 	if data.is_empty():
 		return
 
-	# Zmiana włosów i brwi
+	# 1. Zmiana MODELU włosów (musi być pierwsza, żeby znaleźć nowy mesh dla zmiany koloru)
+	if data.has("hair_type"):
+		var new_type = int(data["hair_type"])
+		# Zmieniamy model jeśli typ jest inny LUB jeśli nie mamy przypisanego mesha (np. start gry)
+		if new_type != current_hair_type or hair_mesh == null:
+			current_hair_type = new_type
+			change_hair_model(current_hair_type)
+
+	# 2. Zmiana KOLORU włosów i brwi
 	if data.has("hair_color_id"):
 		current_hair_color = data["hair_color_id"]
 		
-		# 1. Zmień teksturę włosów
+		# Aplikuj zmiany
 		update_hair_texture()
-		
-		# 2. Zmień kolor brwi na pasujący
 		update_eyebrow_color(current_hair_color)
 
 
+func change_hair_model(type_index: int) -> void:
+	if not hair_attachment_point:
+		print("BŁĄD: Nie przypisano hair_attachment_point w inspektorze!")
+		return
+		
+	# Usuń stare włosy (wszystkie dzieci punktu zaczepienia)
+	for child in hair_attachment_point.get_children():
+		child.queue_free()
+	
+	# Tablice są indeksowane od 0, a typy włosów numerujemy od 1.
+	var array_index = type_index - 1
+	
+	if hair_scenes != null and array_index >= 0 and array_index < hair_scenes.size():
+		var scene_to_spawn = hair_scenes[array_index]
+		if scene_to_spawn:
+			var new_hair_node = scene_to_spawn.instantiate()
+			hair_attachment_point.add_child(new_hair_node)
+			
+			# Znajdź MeshInstance3D w nowej scenie, żeby móc zmieniać kolor
+			# Szukamy rekurencyjnie noda, który ma w nazwie "Hair"
+			hair_mesh = _find_mesh_recursive(new_hair_node, "Hair")
+			
+			# Fallback: jeśli nie znaleziono po nazwie, weź pierwszy lepszy MeshInstance3D
+			if not hair_mesh:
+				hair_mesh = _find_mesh_recursive(new_hair_node, "")
+			
+			print("Zmieniono model włosów na typ: ", type_index)
+		else:
+			print("BŁĄD: Pusta scena w tablicy hair_scenes pod indeksem ", array_index)
+	else:
+		print("BŁĄD: Nieprawidłowy indeks włosów: ", type_index, " (Dostępne: ", hair_scenes.size(), ")")
+
+
 func update_hair_texture() -> void:
-	if not hair_mesh: return
+	if not hair_mesh: 
+		# print("Brak hair_mesh do zmiany koloru") 
+		return
 
 	# Budowanie ścieżki do tekstury włosów
+	# Np. t_female_hair1_blonde.png
 	var base_path = "res://Assets/Resources/textures/FemaleCharacter/Hair/"
 	var texture_name = "t_female_hair" + str(current_hair_type) + "_" + current_hair_color + ".png"
 	var full_path = base_path + texture_name
@@ -100,8 +153,9 @@ func update_hair_texture() -> void:
 		var new_texture = load(full_path)
 		var current_mat = hair_mesh.get_active_material(0) as StandardMaterial3D
 		
+		# Używamy override material, aby nie zmieniać oryginalnego zasobu na dysku
 		if current_mat:
-			# Jeśli nie mamy jeszcze override'a, tworzymy go
+			# Jeśli nie mamy jeszcze override'a, tworzymy go na bazie oryginału
 			if hair_mesh.get_surface_override_material(0) == null:
 				var mat_copy = current_mat.duplicate()
 				hair_mesh.set_surface_override_material(0, mat_copy)
@@ -120,28 +174,33 @@ func update_eyebrow_color(color_id: String) -> void:
 		target_mesh = face_mesh_ref
 	
 	if not target_mesh:
-		print("DEBUG: Nie znaleziono żadnego mesha do zmiany brwi!")
 		return
 	
 	# 2. Pobieramy materiał
 	var mat = target_mesh.get_active_material(0)
 	
-	# 3. Diagnostyka
-	if mat == null:
-		print("DEBUG: Mesh ", target_mesh.name, " nie ma żadnego materiału!")
-		return
-		
-	if not (mat is ShaderMaterial):
-		print("DEBUG: Materiał na ", target_mesh.name, " to NIE jest ShaderMaterial! Typ: ", mat.get_class())
+	if mat == null or not (mat is ShaderMaterial):
 		return
 
-	# 4. Zmiana koloru w shaderze
+	# 3. Zmiana koloru w shaderze
 	if eyebrow_palette.has(color_id):
 		var new_col = eyebrow_palette[color_id]
-		print("DEBUG: Zmieniam kolor brwi na: ", color_id, " (", new_col, ")")
 		mat.set_shader_parameter("new_eyebrow_color", new_col)
-	else:
-		print("DEBUG: Nie mam w palecie koloru o nazwie: ", color_id)
+
+
+# Funkcja pomocnicza do szukania mesha wewnątrz instancjonowanej sceny
+func _find_mesh_recursive(node: Node, target_name_part: String) -> MeshInstance3D:
+	if node is MeshInstance3D:
+		# Jeśli target_name_part jest pusty, zwracamy pierwszy znaleziony mesh
+		# Jeśli nie jest pusty, sprawdzamy czy nazwa zawiera ten ciąg
+		if target_name_part == "" or node.name.contains(target_name_part):
+			return node
+	
+	for child in node.get_children():
+		var result = _find_mesh_recursive(child, target_name_part)
+		if result:
+			return result
+	return null
 
 
 # --- EKWIPUNEK (STANDARDOWY KOD) ---

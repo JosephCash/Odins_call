@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://bqlstk3qbqsnc"]
 
-[ext_resource type="PackedScene" uid="uid://cu6p8y4w2wbfr" path="res://Assets/GLB_Files/Female_Hair1_skeletalmesh.glb" id="1_xcndn"]
+[ext_resource type="PackedScene" uid="uid://c416fwfjrhb03" path="res://Assets/GLB_Files/Female_Hair1_skeletalmesh.glb" id="1_xcndn"]
 [ext_resource type="Material" uid="uid://b3cfcn4ao713n" path="res://Assets/Resources/Materials/FemaleCharacter/Hair/Female_Hair1_blonde.tres" id="2_tt1x8"]
 [ext_resource type="Script" uid="uid://cxo3krs0ltet0" path="res://addons/jigglebones/jigglebone.gd" id="3_e6ucl"]
 

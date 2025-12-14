@@ -34,6 +34,60 @@ var hair_mesh: MeshInstance3D
 var current_hair_type: int = 1 
 var current_hair_color: String = "blonde"
 
+# --- NOWE: LOGIKA SKÓRY (3 KOLORY) ---
+var current_skin_id: String = "Default"
+
+# Baza kolorów (Light, Mid, Dark) - dopasuj kolory hex do swojego stylu
+var skin_presets = {
+	# ORYGINAŁ (Bez zmian)
+	"Default": {
+		"light": Color("eba697"), 
+		"mid":   Color("de9a8f"), 
+		"dark":  Color("be7e71"),
+		"lips": 0.0 
+	},
+	
+	# PALE: Rozjaśniony Default (mniej biały, bardziej naturalny jasny róż)
+	"Pale": {
+		"light": Color("ecc1ba"),
+		"mid":   Color("e8b6ac"), 
+		"dark":  Color("cc9992"),
+		"lips": -0.3
+	},
+	
+	# YELLOW: Ciepły odcień (mniej żółty, bardziej brzoskwiniowy/złoty, bliżej Defaulta)
+	"Yellow": {
+		"light": Color("ecc6ab"), 
+		"mid":   Color("e8bba0"), 
+		"dark":  Color("cc9e83"),
+		"lips": -0.1 
+	},
+	
+	# TAN: Lekka opalenizna (nie pomarańczowa, po prostu cieplejsza wersja Defaulta)
+	"Tan": {
+		"light": Color("cc947a"), # Minimalnie jaśniejszy od bazy
+		"mid":   Color("bd846b"), # Baza: ciepły, indyjski brąz
+		"dark":  Color("945f4d"),  # Cień
+		"lips": 0.1 
+	},
+	
+	# LIGHTDARK: Średni brąz (trochę ciemniejszy Default, zachowuje czerwonawy odcień)
+	"Lightdark": {
+		"light": Color("cc9d8d"), 
+		"mid":   Color("bf8d7c"), 
+		"dark":  Color("996b5b"),
+		"lips": 0.1 
+	},
+	
+	# DARK: Ciemny brąz (ale nie czarny, zachowuje ciepło skóry)
+	"Dark": {
+		"light": Color("a17263"), 
+		"mid":   Color("946354"), 
+		"dark":  Color("704437"),
+		"lips": 0.2
+	}
+}
+
 # PALETA BRWI
 var eyebrow_palette = {
 	"blonde": Color(0.67, 0.46, 0.34),
@@ -50,8 +104,7 @@ var eye_palette = {
 	"brown":     {"h": -0.55, "s": -0.03,  "v": -0.22},
 	"grey":      {"h": 0.0,   "s": -1.0,  "v": -0.1},
 	"turquoise": {"h": -0.15, "s": 0.1,   "v": 0.0},
-	"red":       {"h": 0.45,  "s": 0.5,   "v": -0.2},
-	"purple":    {"h": 0.15,  "s": 0.3,   "v": -0.1}
+	"orange":    {"h": 0.44,  "s": 0.1,   "v": 0.05}
 }
 
 
@@ -91,6 +144,11 @@ func apply_appearance(data: Dictionary) -> void:
 		
 	if data.has("eye_color_id"):
 		update_eye_color(data["eye_color_id"])
+		
+	# NOWE: Aplikowanie skóry
+	if data.has("skin_id"):
+		current_skin_id = data["skin_id"]
+		refresh_all_skin_materials()
 
 
 func change_hair_model(type_index: int) -> void:
@@ -129,6 +187,43 @@ func update_hair_texture() -> void:
 			else:
 				hair_mesh.get_surface_override_material(0).albedo_texture = new_texture
 
+# --- NOWE FUNKCJE OBSŁUGI SKÓRY ---
+func refresh_all_skin_materials() -> void:
+	if not skin_presets.has(current_skin_id):
+		current_skin_id = "Default"
+	
+	var colors = skin_presets[current_skin_id]
+	
+	# Aplikujemy na WSZYSTKIE części ciała
+	if head_mesh: _inject_colors_to_mesh(head_mesh, colors)
+	if torso_mesh: _inject_colors_to_mesh(torso_mesh, colors)
+	if legs_mesh: _inject_colors_to_mesh(legs_mesh, colors)
+	if hands_mesh: _inject_colors_to_mesh(hands_mesh, colors)
+	if feet_mesh: _inject_colors_to_mesh(feet_mesh, colors)
+	
+	# WAŻNE: Dodajemy Twarz (Face), bo to osobny mesh z ustami!
+	if face_mesh_ref: _inject_colors_to_mesh(face_mesh_ref, colors)
+
+func _inject_colors_to_mesh(mesh_instance: MeshInstance3D, colors: Dictionary) -> void:
+	# Sprawdzamy override material oraz mesh material
+	var mat_count = mesh_instance.get_surface_override_material_count()
+	if mat_count == 0 and mesh_instance.mesh:
+		mat_count = mesh_instance.mesh.get_surface_count()
+		
+	for i in range(mat_count):
+		var mat = mesh_instance.get_active_material(i)
+		
+		if mat is ShaderMaterial:
+			# 1. SKÓRA - Wysyłamy do KAŻDEGO mesha (Twarz, Ciało, Nogi...)
+			mat.set_shader_parameter("skin_light", colors["light"])
+			mat.set_shader_parameter("skin_mid",   colors["mid"])
+			mat.set_shader_parameter("skin_dark",  colors["dark"])
+			
+			# 2. USTA - Wysyłamy TYLKO do Twarzy (Face)
+			if mesh_instance == face_mesh_ref:
+				var lip_val = colors.get("lips", 0.0)
+				mat.set_shader_parameter("lip_darkness", lip_val)
+
 func update_eyebrow_color(color_id: String) -> void:
 	var target_mesh = head_mesh
 	if face_mesh_ref: target_mesh = face_mesh_ref
@@ -160,7 +255,7 @@ func _find_mesh_recursive(node: Node, target_name_part: String) -> MeshInstance3
 		if res: return res
 	return null
 
-# --- FUNKCJE EKWIPUNKU (BEZ ZMIAN) ---
+# --- FUNKCJE EKWIPUNKU (Dodano odświeżanie skóry po założeniu itemu) ---
 func apply_feet_item(item: ItemDataEquipFeet) -> void:
 	if item:
 		if item.mesh: feet_mesh.mesh = item.mesh
@@ -170,6 +265,8 @@ func apply_feet_item(item: ItemDataEquipFeet) -> void:
 	else:
 		feet_mesh.mesh = default_feet_mesh
 		feet_mesh.set_surface_override_material(0, default_feet_material)
+	refresh_all_skin_materials() # Odświeżamy kolor skóry na nowym bucie
+
 func apply_legs_item(item: ItemDataEquipLegs) -> void:
 	if item:
 		if item.mesh: legs_mesh.mesh = item.mesh
@@ -179,6 +276,8 @@ func apply_legs_item(item: ItemDataEquipLegs) -> void:
 	else:
 		legs_mesh.mesh = default_legs_mesh
 		legs_mesh.set_surface_override_material(0, default_legs_material)
+	refresh_all_skin_materials()
+
 func apply_torso_item(item: ItemDataEquipTorso) -> void:
 	if item:
 		if item.mesh: torso_mesh.mesh = item.mesh
@@ -188,6 +287,8 @@ func apply_torso_item(item: ItemDataEquipTorso) -> void:
 	else:
 		torso_mesh.mesh = default_torso_mesh
 		torso_mesh.set_surface_override_material(0, default_torso_material)
+	refresh_all_skin_materials()
+
 func apply_hands_item(item: ItemDataEquipHands) -> void:
 	if item:
 		if item.mesh: hands_mesh.mesh = item.mesh
@@ -197,6 +298,8 @@ func apply_hands_item(item: ItemDataEquipHands) -> void:
 	else:
 		hands_mesh.mesh = default_hands_mesh
 		hands_mesh.set_surface_override_material(0, default_hands_material)
+	refresh_all_skin_materials()
+
 func apply_head_item(item: ItemDataEquipHead) -> void:
 	if item:
 		if item.mesh: head_mesh.mesh = item.mesh
@@ -206,3 +309,4 @@ func apply_head_item(item: ItemDataEquipHead) -> void:
 	else:
 		head_mesh.mesh = default_head_mesh
 		head_mesh.set_surface_override_material(0, default_head_material)
+	refresh_all_skin_materials()

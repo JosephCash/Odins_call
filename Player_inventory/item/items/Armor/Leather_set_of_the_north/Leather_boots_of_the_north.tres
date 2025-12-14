@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="ItemDataEquipFeet" load_steps=6 format=3 uid="uid://sq17f7s5kp0r"]
 
 [ext_resource type="Script" uid="uid://cwjh733mtlrjk" path="res://Scripts/Item/item_data_equip_feet.gd" id="1_gicw2"]
-[ext_resource type="Material" uid="uid://c4uncgrn5fyv0" path="res://Assets/Resources/Materials/FemaleArmor/Leather_set_of_the_north.tres" id="1_y4tog"]
+[ext_resource type="Material" uid="uid://c4uncgrn5fyv0" path="res://Assets/Resources/Materials/FemaleArmor/Leather_set_of_the_north_ShaderMaterial.tres" id="1_y4tog"]
 [ext_resource type="ArrayMesh" uid="uid://b8wkq1o87oor7" path="res://Assets/Resources/Mesh/FemaleCharacter/Armor_of_the_north_female/Leather_boots_of_the_north.res" id="2_bql1h"]
 [ext_resource type="Texture2D" uid="uid://5vl4fcltjwi4" path="res://Assets/Resources/textures/Icon_atlas/Armor_AtlasIkon.png" id="2_ebg84"]
 

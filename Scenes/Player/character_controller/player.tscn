@@ -17,7 +17,7 @@
 [ext_resource type="ArrayMesh" uid="uid://b1a3uyynttbug" path="res://Assets/Resources/Mesh/FemaleCharacter/Torso.res" id="11_fj5ob"]
 [ext_resource type="ArrayMesh" uid="uid://b8g0l45hacclt" path="res://Assets/Resources/Mesh/FemaleCharacter/Legs.res" id="12_du30a"]
 [ext_resource type="ArrayMesh" uid="uid://dvxong03ijk3" path="res://Assets/Resources/Mesh/FemaleCharacter/Feet.res" id="13_wwrm0"]
-[ext_resource type="Material" uid="uid://bdy3ydi7tqgoc" path="res://Assets/Resources/Materials/FemaleCharacter/Female_body_Material.tres" id="14_fj5ob"]
+[ext_resource type="Material" uid="uid://bdy3ydi7tqgoc" path="res://Assets/Resources/Materials/FemaleCharacter/Female_body_ShaderMaterial.tres" id="14_fj5ob"]
 [ext_resource type="PackedScene" uid="uid://bqlstk3qbqsnc" path="res://Scenes/Player/character_controller/female_hair_1_skeletalmesh.tscn" id="14_fpmok"]
 
 [sub_resource type="Skin" id="Skin_0q7iu"]

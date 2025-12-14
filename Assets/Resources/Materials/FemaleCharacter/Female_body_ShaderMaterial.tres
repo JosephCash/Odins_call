@@ -1,0 +1,108 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://bdy3ydi7tqgoc"]
+
+[ext_resource type="Texture2D" uid="uid://cnmc0bpmmk026" path="res://Assets/Resources/textures/FemaleCharacter/body/t_female_characterbody_blonde.png" id="1_bq0vw"]
+
+[sub_resource type="Shader" id="Shader_2k2qm"]
+code = "// NOTE: Shader automatically converted from Godot Engine 4.5.stable's StandardMaterial3D.
+// Zaktualizowany o logikę Skin Swap (Podmiana Kolorów Skóry)
+
+shader_type spatial;
+render_mode blend_mix, depth_draw_always, cull_back, diffuse_burley, specular_schlick_ggx, unshaded;
+
+// --- ORYGINALNE UNIFORMY ---
+uniform vec4 albedo : source_color;
+uniform sampler2D texture_albedo : source_color, filter_nearest_mipmap, repeat_enable;
+uniform float alpha_scissor_threshold : hint_range(0.0, 1.0, 0.001);
+uniform ivec2 albedo_texture_size;
+uniform float point_size : hint_range(0.1, 128.0, 0.1);
+
+uniform float roughness : hint_range(0.0, 1.0);
+uniform sampler2D texture_metallic : hint_default_white, filter_nearest_mipmap, repeat_enable;
+uniform vec4 metallic_texture_channel;
+uniform sampler2D texture_roughness : hint_roughness_r, filter_nearest_mipmap, repeat_enable;
+
+uniform float specular : hint_range(0.0, 1.0, 0.01);
+uniform float metallic : hint_range(0.0, 1.0, 0.01);
+
+uniform vec3 uv1_scale;
+uniform vec3 uv1_offset;
+uniform vec3 uv2_scale;
+uniform vec3 uv2_offset;
+
+// --- NOWE UNIFORMY: SKIN SWAP SYSTEM ---
+// Te kolory pobierasz pipetą z tekstury (Maski)
+uniform vec4 mask_light : source_color;
+uniform vec4 mask_mid   : source_color;
+uniform vec4 mask_dark  : source_color;
+
+// Te kolory są wstrzykiwane przez skrypt (Targety)
+uniform vec4 skin_light : source_color;
+uniform vec4 skin_mid   : source_color;
+uniform vec4 skin_dark  : source_color;
+
+// Tolerancja dla porównywania kolorów
+const float tolerance = 0.01;
+
+void vertex() {
+	UV = UV * uv1_scale.xy + uv1_offset.xy;
+}
+
+void fragment() {
+	vec2 base_uv = UV;
+	vec4 albedo_tex = texture(texture_albedo, base_uv);
+
+	// --- LOGIKA PODMIANY KOLORÓW (SKIN SWAP) ---
+	// Pracujemy na czystym kolorze z tekstury zanim nałożymy tint 'albedo'
+	vec3 final_rgb = albedo_tex.rgb;
+
+	// 1. Sprawdzamy jasny odcień
+	if (distance(albedo_tex.rgb, mask_light.rgb) < tolerance) {
+		final_rgb = skin_light.rgb;
+	}
+	// 2. Sprawdzamy średni odcień (baza)
+	else if (distance(albedo_tex.rgb, mask_mid.rgb) < tolerance) {
+		final_rgb = skin_mid.rgb;
+	}
+	// 3. Sprawdzamy ciemny odcień (cień)
+	else if (distance(albedo_tex.rgb, mask_dark.rgb) < tolerance) {
+		final_rgb = skin_dark.rgb;
+	}
+
+	// Aplikujemy kolor do wyjścia (razem z oryginalnym tintem materiału)
+	ALBEDO = albedo.rgb * final_rgb;
+
+	// --- RESZTA ORYGINALNEGO SHADERA ---
+	float metallic_tex = dot(texture(texture_metallic, base_uv), metallic_texture_channel);
+	METALLIC = metallic_tex * metallic;
+	SPECULAR = specular;
+
+	vec4 roughness_texture_channel = vec4(1.0, 0.0, 0.0, 0.0);
+	float roughness_tex = dot(texture(texture_roughness, base_uv), roughness_texture_channel);
+	ROUGHNESS = roughness_tex * roughness;
+
+	ALPHA *= albedo.a * albedo_tex.a;
+	ALPHA_SCISSOR_THRESHOLD = alpha_scissor_threshold;
+}"
+
+[resource]
+render_priority = 0
+shader = SubResource("Shader_2k2qm")
+shader_parameter/albedo = Color(1, 1, 1, 1)
+shader_parameter/texture_albedo = ExtResource("1_bq0vw")
+shader_parameter/alpha_scissor_threshold = 0.0
+shader_parameter/albedo_texture_size = Vector2i(256, 256)
+shader_parameter/point_size = 1.0
+shader_parameter/roughness = 1.0
+shader_parameter/metallic_texture_channel = Vector4(1, 0, 0, 0)
+shader_parameter/specular = 0.5
+shader_parameter/metallic = 0.0
+shader_parameter/uv1_scale = Vector3(1, 1, 1)
+shader_parameter/uv1_offset = Vector3(0, 0, 0)
+shader_parameter/uv2_scale = Vector3(1, 1, 1)
+shader_parameter/uv2_offset = Vector3(0, 0, 0)
+shader_parameter/mask_light = Color(0.8901961, 0.6039216, 0.5372549, 1)
+shader_parameter/mask_mid = Color(0.8392157, 0.56078434, 0.5137255, 1)
+shader_parameter/mask_dark = Color(0.7137255, 0.4509804, 0.4, 1)
+shader_parameter/skin_light = Color(0.8901961, 0.6039216, 0.5372549, 1)
+shader_parameter/skin_mid = Color(0.8392157, 0.56078434, 0.5137255, 1)
+shader_parameter/skin_dark = Color(0.7137255, 0.4509804, 0.4, 1)

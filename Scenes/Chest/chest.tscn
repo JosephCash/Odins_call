@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://crmaf7p4ixc2c"]
+[gd_scene load_steps=6 format=3 uid="uid://crmaf7p4ixc2c"]
 
 [ext_resource type="Script" uid="uid://hm5p1h7dppq6" path="res://Scripts/Chest/chest.gd" id="1_d6k1h"]
 
@@ -10,6 +10,9 @@ material = SubResource("StandardMaterial3D_jjtjo")
 
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_eu8gf"]
 data = PackedVector3Array(-0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, -0.5)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_d6k1h"]
+radius = 3.5
 
 [node name="Chest" type="StaticBody3D"]
 collision_layer = 5
@@ -23,3 +26,11 @@ mesh = SubResource("BoxMesh_d6k1h")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 shape = SubResource("ConcavePolygonShape3D_eu8gf")
+
+[node name="Area3D" type="Area3D" parent="."]
+collision_mask = 3
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("SphereShape3D_d6k1h")
+
+[connection signal="body_exited" from="Area3D" to="." method="_on_area_3d_body_exited"]

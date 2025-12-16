@@ -1,3 +1,5 @@
+CollisionShape3D
+Area3D
 Node3D
 Jigglebone
 Button
@@ -11,4 +13,3 @@ CanvasLayer
 DirectionalLight3D
 Camera3D
 ColorRect
-CollisionShape3D

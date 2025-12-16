@@ -11,13 +11,14 @@ uniform sampler2D texture_albedo : source_color, filter_nearest_mipmap, repeat_e
 
 // --- SEKCJA BRWI ---
 uniform vec4 original_eyebrow_color : source_color; 
-uniform vec4 new_eyebrow_color : source_color;      
+uniform vec4 new_eyebrow_color : source_color;       
 uniform float eyebrow_sensitivity : hint_range(0.0, 1.0) = 0.2; 
+uniform float eyebrow_softness : hint_range(0.0, 0.2) = 0.01; // Dodane dla wygładzenia krawędzi
 
-// --- SEKCJA UST (NOWA) ---
-uniform vec4 original_lip_color : source_color;      // Kolor ust z tekstury (pipeta)
-uniform float lip_sensitivity : hint_range(0.0, 1.0) = 0.15; // Tolerancja
-uniform float lip_darkness : hint_range(-1.0, 1.0) = 0.0;     // Suwak przyciemnienia (0.0 = brak zmian, 0.5 = ciemne)
+// --- SEKCJA UST ---
+uniform vec4 original_lip_color : source_color;      
+uniform float lip_sensitivity : hint_range(0.0, 1.0) = 0.15; 
+uniform float lip_darkness : hint_range(-1.0, 1.0) = 0.0;     
 
 // --- SEKCJA OCZU ---
 uniform vec4 original_eye_color : source_color;            
@@ -29,7 +30,7 @@ uniform float eye_val_shift : hint_range(-1.0, 1.0) = 0.0;
 uniform vec3 uv1_scale;
 uniform vec3 uv1_offset;
 
-// --- FUNKCJE RGB <-> HSV ---
+// --- FUNKCJE POMOCNICZE ---
 vec3 rgb2hsv(vec3 c) {
     vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
     vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
@@ -45,55 +46,64 @@ vec3 hsv2rgb(vec3 c) {
     vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
     return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
-// ---------------------------
 
 void vertex() {
-	UV = UV * uv1_scale.xy + uv1_offset.xy;
+    UV = UV * uv1_scale.xy + uv1_offset.xy;
 }
 
 void fragment() {
-	vec2 base_uv = UV;
-	vec4 albedo_tex = texture(texture_albedo, base_uv);
-	vec3 final_color = albedo.rgb * albedo_tex.rgb;
+    vec2 base_uv = UV;
+    vec4 albedo_tex = texture(texture_albedo, base_uv);
+    vec3 base_color = albedo.rgb * albedo_tex.rgb;
+    
+    // 1. OBLICZANIE MASEK (0.0 = brak dopasowania, 1.0 = pełne dopasowanie)
+    // Używamy step(dystans, czułość), co daje 1.0 jeśli dystans < czułość
+    
+    // Maska Ust
+    float lip_dist = distance(base_color, original_lip_color.rgb);
+    float lip_mask = 1.0 - step(lip_sensitivity, lip_dist);
+    
+    // Maska Oczu
+    float eye_dist = distance(base_color, original_eye_color.rgb);
+    float eye_mask = 1.0 - step(eye_sensitivity, eye_dist);
 
-	// --- 1. ZMIANA KOLORU UST (NOWA) ---
-	float lip_dist = distance(final_color, original_lip_color.rgb);
-	float lip_mask = 1.0 - step(lip_sensitivity, lip_dist);
-	
-	if (lip_mask > 0.01) {
-		vec3 lip_hsv = rgb2hsv(final_color);
-		
-		// Odejmujemy jasność (Value)
-		lip_hsv.z = clamp(lip_hsv.z - lip_darkness, 0.0, 1.0);
-		
-		vec3 darkened_lips = hsv2rgb(lip_hsv);
-		final_color = mix(final_color, darkened_lips, lip_mask);
-	}
-	// -----------------------------------
+    // Maska Brwi
+    float brow_dist = distance(base_color, original_eyebrow_color.rgb);
+    // Opcjonalnie: smoothstep zamiast step dla ładniejszych krawędzi (anty-aliasing)
+    float brow_mask = 1.0 - smoothstep(eyebrow_sensitivity - eyebrow_softness, eyebrow_sensitivity, brow_dist);
 
-	// --- 2. ZMIANA KOLORU OCZU ---
-	float eye_dist = distance(final_color, original_eye_color.rgb);
-	float eye_mask = 1.0 - step(eye_sensitivity, eye_dist);
+    // 2. MODYFIKACJA KOLORÓW (HSV)
+    // Konwertujemy raz na HSV
+    vec3 hsv = rgb2hsv(base_color);
 
-	if (eye_mask > 0.01) {
-		vec3 hsv = rgb2hsv(final_color);
-		hsv.x += eye_hue_shift; 
-		hsv.y = clamp(hsv.y + eye_sat_shift, 0.0, 1.0); 
-		hsv.z = clamp(hsv.z + eye_val_shift, 0.0, 1.0); 
-		vec3 shifted_color = hsv2rgb(hsv);
-		final_color = mix(final_color, shifted_color, eye_mask);
-	}
+    // Obliczamy zmodyfikowane parametry dla oczu
+    float eye_h = hsv.x + eye_hue_shift;
+    float eye_s = clamp(hsv.y + eye_sat_shift, 0.0, 1.0);
+    float eye_v = clamp(hsv.z + eye_val_shift, 0.0, 1.0);
 
-	// --- 3. ZMIANA KOLORU BRWI ---
-	// Używamy raw_color, żeby zmiany oczu/ust nie zakłóciły maski brwi (jeśli nachodzą)
-	vec3 raw_color = albedo.rgb * albedo_tex.rgb;
-	float brow_dist = distance(raw_color, original_eyebrow_color.rgb);
-	float brow_mask = 1.0 - step(eyebrow_sensitivity, brow_dist);
-	
-	final_color = mix(final_color, new_eyebrow_color.rgb, brow_mask);
+    // Obliczamy zmodyfikowane parametry dla ust (tylko Value/Jasność)
+    float lip_v = clamp(hsv.z - lip_darkness, 0.0, 1.0);
 
-	ALBEDO = final_color;
-	ALPHA = albedo.a * albedo_tex.a;
+    // MIESZAMY WARTOŚCI HSV NA PODSTAWIE MASEK
+    // Jeśli eye_mask == 1.0, bierzemy eye_h, w przeciwnym razie oryginalne hsv.x
+    hsv.x = mix(hsv.x, eye_h, eye_mask);
+    hsv.y = mix(hsv.y, eye_s, eye_mask);
+    
+    // Tutaj musimy uważać, jeśli maski się nakładają (zwykle nie powinny).
+    // Priorytet ustalamy kolejnością. Tutaj: Usta nadpisują oczy, jeśli się nałożą.
+    float target_v = mix(hsv.z, eye_v, eye_mask);
+    target_v = mix(target_v, lip_v, lip_mask);
+    hsv.z = target_v;
+
+    // Konwertujemy z powrotem na RGB
+    vec3 final_color = hsv2rgb(hsv);
+
+    // 3. APLIKACJA BRWI (Zwykłe zastąpienie koloru, bez HSV)
+    // To robimy na końcu, nadpisując wynik z HSV
+    final_color = mix(final_color, new_eyebrow_color.rgb, brow_mask);
+
+    ALBEDO = final_color;
+    ALPHA = albedo.a * albedo_tex.a;
 }"
 
 [resource]
@@ -104,13 +114,14 @@ shader_parameter/texture_albedo = ExtResource("1_kjhp1")
 shader_parameter/original_eyebrow_color = Color(0.6784314, 0.46666667, 0.34117648, 1)
 shader_parameter/new_eyebrow_color = Color(0.6784314, 0.46666667, 0.34117648, 1)
 shader_parameter/eyebrow_sensitivity = 0.01200000057
+shader_parameter/eyebrow_softness = 0.01
 shader_parameter/original_lip_color = Color(0.6313726, 0.34509805, 0.32941177, 1)
 shader_parameter/lip_sensitivity = 0.010000000475
 shader_parameter/lip_darkness = 4.7499999933364734e-08
 shader_parameter/original_eye_color = Color(0.14418128, 0.38599244, 0.99995476, 1)
 shader_parameter/eye_sensitivity = 0.9030000428925
 shader_parameter/eye_hue_shift = 0.43700006825749993
-shader_parameter/eye_sat_shift = 0.10000005224999997
+shader_parameter/eye_sat_shift = 0.10000005224999996
 shader_parameter/eye_val_shift = 0.06500005058749991
 shader_parameter/uv1_scale = Vector3(1, 1, 1)
 shader_parameter/uv1_offset = Vector3(0, 0, 0)

@@ -4,7 +4,7 @@
 
 [sub_resource type="Shader" id="Shader_2k2qm"]
 code = "// NOTE: Shader automatically converted from Godot Engine 4.5.stable's StandardMaterial3D.
-// Zaktualizowany o logikę Skin Swap (Podmiana Kolorów Skóry)
+// Zoptymalizowany (Branchless) Skin Swap
 
 shader_type spatial;
 render_mode blend_mix, depth_draw_always, cull_back, diffuse_burley, specular_schlick_ggx, unshaded;
@@ -29,18 +29,16 @@ uniform vec3 uv1_offset;
 uniform vec3 uv2_scale;
 uniform vec3 uv2_offset;
 
-// --- NOWE UNIFORMY: SKIN SWAP SYSTEM ---
-// Te kolory pobierasz pipetą z tekstury (Maski)
+// --- UNIFORMY SKIN SWAP ---
 uniform vec4 mask_light : source_color;
 uniform vec4 mask_mid   : source_color;
 uniform vec4 mask_dark  : source_color;
 
-// Te kolory są wstrzykiwane przez skrypt (Targety)
 uniform vec4 skin_light : source_color;
 uniform vec4 skin_mid   : source_color;
 uniform vec4 skin_dark  : source_color;
 
-// Tolerancja dla porównywania kolorów
+// Tolerancja - jak blisko musi być kolor, by został uznany za maskę
 const float tolerance = 0.01;
 
 void vertex() {
@@ -51,24 +49,35 @@ void fragment() {
 	vec2 base_uv = UV;
 	vec4 albedo_tex = texture(texture_albedo, base_uv);
 
-	// --- LOGIKA PODMIANY KOLORÓW (SKIN SWAP) ---
-	// Pracujemy na czystym kolorze z tekstury zanim nałożymy tint 'albedo'
-	vec3 final_rgb = albedo_tex.rgb;
+	// --- LOGIKA PODMIANY KOLORÓW (BRANCHLESS) ---
+	vec3 base_rgb = albedo_tex.rgb;
 
-	// 1. Sprawdzamy jasny odcień
-	if (distance(albedo_tex.rgb, mask_light.rgb) < tolerance) {
-		final_rgb = skin_light.rgb;
-	}
-	// 2. Sprawdzamy średni odcień (baza)
-	else if (distance(albedo_tex.rgb, mask_mid.rgb) < tolerance) {
-		final_rgb = skin_mid.rgb;
-	}
-	// 3. Sprawdzamy ciemny odcień (cień)
-	else if (distance(albedo_tex.rgb, mask_dark.rgb) < tolerance) {
-		final_rgb = skin_dark.rgb;
-	}
+	// 1. Obliczamy dystans (różnicę) między kolorem piksela a kolorami masek
+	float dist_light = distance(base_rgb, mask_light.rgb);
+	float dist_mid   = distance(base_rgb, mask_mid.rgb);
+	float dist_dark  = distance(base_rgb, mask_dark.rgb);
 
-	// Aplikujemy kolor do wyjścia (razem z oryginalnym tintem materiału)
+	// 2. Tworzymy wagi (maski binarne 0.0 lub 1.0)
+	// step(edge, x) zwraca 1.0 jeśli x >= edge.
+	// Tutaj sprawdzamy: czy 'tolerance' jest większe od 'dist'? (czyli czy mieścimy się w tolerancji)
+	float w_light = step(dist_light, tolerance);
+	float w_mid   = step(dist_mid, tolerance);
+	float w_dark  = step(dist_dark, tolerance);
+
+	// 3. Składamy kolor docelowy (zamiennik)
+	// Mnożymy kolor skóry przez wagę. Jeśli waga to 0, kolor jest ignorowany.
+	vec3 replacement_color = (skin_light.rgb * w_light) + (skin_mid.rgb * w_mid) + (skin_dark.rgb * w_dark);
+
+	// 4. Sumujemy wagi, aby wiedzieć, czy w ogóle coś podmieniamy.
+	// clamp(x, 0, 1) zapewnia, że nie przekroczymy 1.0 (gdyby kolory masek na siebie nachodziły)
+	float replacement_mask = clamp(w_light + w_mid + w_dark, 0.0, 1.0);
+
+	// 5. Mieszamy:
+	// Jeśli replacement_mask == 0.0 -> używamy base_rgb (oryginał)
+	// Jeśli replacement_mask == 1.0 -> używamy replacement_color (nowa skóra)
+	vec3 final_rgb = mix(base_rgb, replacement_color, replacement_mask);
+
+	// Aplikujemy ostateczny kolor (razem z tintem albedo materiału)
 	ALBEDO = albedo.rgb * final_rgb;
 
 	// --- RESZTA ORYGINALNEGO SHADERA ---

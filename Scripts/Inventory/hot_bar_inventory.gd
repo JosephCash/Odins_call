@@ -1,5 +1,6 @@
 extends PanelContainer
 
+# Sygnał emitowany przy użyciu skrótu klawiszowego oraz referencje do sceny slotu i kontenera UI
 signal hot_bar_use(index: int)
 
 const Slot = preload("uid://clw23l0nxsi3s")
@@ -7,6 +8,7 @@ const Slot = preload("uid://clw23l0nxsi3s")
 @onready var h_box_container: HBoxContainer = $MarginContainer/HBoxContainer
 
 func _unhandled_key_input(event: InputEvent) -> void:
+	# Jeśli pasek jest widoczny, obsługuje klawisze 1-4 emitując sygnał użycia dla odpowiedniego indeksu (0-3)
 	if not visible or not event.is_pressed():
 		return
 	
@@ -14,15 +16,17 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		hot_bar_use.emit(event.keycode - KEY_1)
 
 func set_inventory_data(inventory_data: InventoryData) -> void:
+	# Podpina sygnały odświeżania widoku i użycia przedmiotu, a następnie inicjuje pasek danymi
 	inventory_data.inventory_updated.connect(populate_hot_bar)
 	populate_hot_bar(inventory_data)
 	hot_bar_use.connect(inventory_data.use_slot_data)
 
 func populate_hot_bar(inventory_data: InventoryData) -> void:
+	# Czyści obecne elementy UI i generuje nowe sloty dla pierwszych 4 pozycji z ekwipunku
 	for child in h_box_container.get_children():
 		child.queue_free()
 		
-	for slot_data in inventory_data.slot_datas. slice(0, 4):
+	for slot_data in inventory_data.slot_datas.slice(0, 4):
 		var slot = Slot.instantiate()
 		h_box_container.add_child(slot)
 		

@@ -1,5 +1,6 @@
 extends CharacterBody3D
 
+# === REFERENCJE DO DANYCH EKWIPUNKU (ZASOBY) ===
 @export var inventory_data: InventoryData
 @export var equip_inventory_head: InventoryDataEquipHead
 @export var equip_inventory_torso: InventoryDataEquipTorso
@@ -14,59 +15,60 @@ extends CharacterBody3D
 
 signal toggle_inventory()
 
+# Referencje do węzłów sceny (raycast interakcji i model 3D)
 @onready var interact_ray: RayCast3D = $"../CameraController/InteractRay"
 @onready var player: Node3D = $WorldModel/Player
 
 # === STATYSTYKI POSTACI ===
 var health: int = 5
 
+# === PARAMETRY RUCHU (Styl Source/Quake) ===
+@export var look_sensitivity := 0.003
+@export var jump_velocity := 6.0 
+@export var auto_bhop := true 		# Umożliwia ciągłe skakanie przy trzymaniu spacji
+@export var walk_speed := 7.0 
+@export var ground_accel := 14.0 	# Szybkość rozpędzania się na ziemi
+@export var ground_decel := 10.0 	# Szybkość hamowania
+@export var ground_friction := 6 
 
-# === PARAMETRY RUCHU ===
-@export var look_sensitivity := 0.003 # Czułość myszy
-@export var jump_velocity := 6.0 # Wysokość skoku
-@export var auto_bhop := true # Czy trzymanie spacji pozwala na ciągłe skakanie
-@export var walk_speed := 7.0 # Prędkość chodu
-@export var ground_accel := 14.0 # Przyspieszenie na ziemi
-@export var ground_decel := 10.0 # Opóźnienie na ziemi
-@export var ground_friction := 6 # Tarcie na ziemi
+@export var air_cap := 0.85 		# Limit sterowności w powietrzu (zapobiega nadmiernemu przyspieszaniu samym sterowaniem)
+@export var air_accel := 800.0 		# Czułość sterowania w locie (air strafe)
+@export var air_move_speed := 500 
 
-@export var air_cap := 0.85 # Maksymalny współczynnik przyspieszenia w powietrzu
-@export var air_accel := 800.0 # Przyspieszenie w powietrzu
-@export var air_move_speed := 500 # Prędkość ruchu w powietrzu
-
-var wish_dir := Vector3.ZERO # Oczekiwany kierunek poruszania się
+var wish_dir := Vector3.ZERO 		# Kierunek, w którym gracz *chce* się poruszać (input)
 
 # === READY ===
 func _ready():
+	# Rejestracja gracza w globalnym menedżerze
 	PlayerManager.player = self
 	
+	# Podłączenie sygnałów odświeżania ekwipunku do funkcji aktualizujących wygląd
 	equip_inventory_feet.inventory_updated.connect(_on_feet_inventory_updated)
 	equip_inventory_legs.inventory_updated.connect(_on_legs_inventory_updated)
 	equip_inventory_torso.inventory_updated.connect(_on_torso_inventory_updated)
 	equip_inventory_hands.inventory_updated.connect(_on_hands_inventory_updated)
 	equip_inventory_head.inventory_updated.connect(_on_head_inventory_updated)
 	
-	print("hejka")
 # === FUNKCJE POMOCNICZE ===
 func get_move_speed() -> float:
 	return walk_speed
 
 
 
-func clip_velocity(normal: Vector3, overbounce : float, _delta : float) -> void: # Wymagane aby działał surf Identyczne jak w grach SOURCE
+# Oblicza wektor prędkości po zderzeniu ze ścianą/podłogą (kluczowe dla mechaniki "Surf")
+func clip_velocity(normal: Vector3, overbounce : float, _delta : float) -> void: 
 	var backoff := self.velocity.dot(normal) * overbounce
 	if backoff >= 0: 
 		return
 	var change := normal * backoff
 	self.velocity -= change
 
-
-func is_surface_too_steep(normal : Vector3) -> bool: # Oblicza nachylenie podłoża
+# Sprawdza czy powierzchnia jest zbyt stroma by na niej stać (np. ściana do surfowania)
+func is_surface_too_steep(normal : Vector3) -> bool: 
 	var max_slope_ang_dot = Vector3(0,1,0).rotated(Vector3(1.0,0,0), self.floor_max_angle).dot(Vector3(0,1,0))
 	if normal.dot(Vector3(0,1,0)) < max_slope_ang_dot:
 		return true
 	return false
-
 
 func reset_to_spawn():
 	self.global_position = %Checkpoint_1.global_position
@@ -74,24 +76,27 @@ func reset_to_spawn():
 
 
 # === INPUT ===
-func _unhandled_input(event): 	# Obsługuje Inputy
+func _unhandled_input(event): 	
+	# Reset pozycji gracza
 	if event.is_action_pressed("reset"):
 		reset_to_spawn()
 	
+	# Otwieranie/zamykanie ekwipunku
 	if Input.is_action_just_pressed("inventory"):
 		toggle_inventory.emit()
 		
+	# Interakcja z otoczeniem
 	if Input.is_action_just_pressed("interact"):
 		interact()
 
 
-
 # === FUNKCJE FIZYKI ===
 
-# Symuluje grawitację i ruch w powietrzu z ograniczeniem prędkości, obsługuje odbicie od ścian.
+# Fizyka powietrza: grawitacja + sterowanie (air control/strafe)
 func _handle_air_physics(delta) -> void: 
 	self.velocity.y -= ProjectSettings.get_setting("physics/3d/default_gravity") * delta
 	
+	# Obliczenie wektora przyspieszenia w powietrzu (z limitem prędkości sterowanej)
 	var cur_speed_in_wish_dir = self.velocity.dot(wish_dir)
 	var capped_speed = min((air_move_speed * wish_dir).length(), air_cap)
 	var add_speed_till_cap = capped_speed - cur_speed_in_wish_dir
@@ -100,6 +105,7 @@ func _handle_air_physics(delta) -> void:
 		accel_speed = min(accel_speed, add_speed_till_cap)
 		self.velocity += accel_speed * wish_dir
 		
+	# Obsługa "ślizgania się" po ścianach (surfing)
 	if is_on_wall():
 		if is_surface_too_steep(get_wall_normal()):
 			self.motion_mode = CharacterBody3D.MOTION_MODE_FLOATING
@@ -108,8 +114,9 @@ func _handle_air_physics(delta) -> void:
 		clip_velocity(get_wall_normal(), 1, delta)
 
 
-# Realizuje przyspieszanie, opóźnianie i tarcie podczas ruchu na ziemi.
+# Fizyka ziemi: przyspieszanie i tarcie
 func _handle_ground_physics(delta) -> void:
+	# Przyspieszanie w kierunku ruchu
 	var cur_speed_in_wish_dir = self.velocity.dot(wish_dir)
 	var add_speed_till_cap = get_move_speed() - cur_speed_in_wish_dir
 	if add_speed_till_cap > 0:
@@ -117,6 +124,7 @@ func _handle_ground_physics(delta) -> void:
 		accel_speed = min(accel_speed, add_speed_till_cap)
 		self.velocity += accel_speed * wish_dir
 		
+	# Aplikacja tarcia (zwalnianie)
 	var control = max(self.velocity.length(), ground_decel)
 	var drop = control * ground_friction * delta
 	var new_speed = max(self.velocity.length() - drop, 0.0)
@@ -125,13 +133,12 @@ func _handle_ground_physics(delta) -> void:
 	self.velocity *= new_speed
 
 
-# === PROCESY ===
+# === PROCESY (PĘTLA GŁÓWNA) ===
 func _physics_process(delta: float) -> void:
-	# ===== CHODZENIE: kierunek względem kamery =====
+	# 1. Pobranie inputu i przeliczenie go na kierunek względem kamery
 	var input_dir: Vector2 = Input.get_vector("move_left","move_right","move_forward","move_back")
 
 	var cam: Camera3D = $"../CameraController/SpringArm3D/Camera3D"
-	# Jeśli ścieżka inna – zmień powyżej.
 	var cam_basis: Basis = cam.global_transform.basis
 
 	var forward: Vector3 = -cam_basis.z
@@ -151,7 +158,7 @@ func _physics_process(delta: float) -> void:
 	wish_dir = move_dir
 	
 	
-	# ===== SKOK + FIZYKA =====
+	# 2. Obsługa skoku i wybór fizyki (ziemia vs powietrze)
 	if is_on_floor():
 		if Input.is_action_just_pressed("jump") or (auto_bhop and Input.is_action_pressed("jump")):
 			self.velocity.y = jump_velocity
@@ -159,18 +166,18 @@ func _physics_process(delta: float) -> void:
 	else:
 		_handle_air_physics(delta)
 
-
-
-	# ===== ROTACJA: patrz w stronę ruchu =====
+	# 3. Rotacja modelu postaci w stronę ruchu
 	if input_dir != Vector2.ZERO and move_dir != Vector3.ZERO:
 		var target_angle: float = atan2((-move_dir.x), (-move_dir.z)) + PI
 		var current_angle: float = rotation.y
 		rotation.y = lerp_angle(current_angle, target_angle, 15.0 * delta)
 
+	# 4. Wykonanie ruchu
 	move_and_slide()
 
 
 func interact() -> void:
+	# Sprawdza czy raycast w coś trafił i wywołuje na obiekcie funkcję interakcji
 	if interact_ray.is_colliding():
 		var collider = interact_ray.get_collider()
 		if collider.has_method("player_interact"):
@@ -178,30 +185,26 @@ func interact() -> void:
 
 func heal(heal_value: int) -> void:
 	health += heal_value
-	
+
+# === AKTUALIZACJA WIZUALNA EKWIPUNKU ===
+# Poniższe funkcje reagują na sygnały zmiany ekwipunku i podmieniają mesh na modelu gracza
+
 func _on_feet_inventory_updated(_inv) -> void:
 	_update_feet_visual()
 
-#UPDATE MESHY ZBROJI#
-
 func _update_feet_visual() -> void:
-	# bierzemy inventory stóp z MainCharacter
 	var feet_inventory = equip_inventory_feet
-
-	# zakładam, że jest tylko 1 slot w equip inventory stóp
 	var slot_data: SlotData = feet_inventory.slot_datas[0]
 
-	# jeśli w slocie jest item i jest typu ItemDataEquipFeet -> zakładamy go
+	# Jeśli jest przedmiot odpowiedniego typu -> załóż, w przeciwnym razie zdejmij
 	if slot_data and slot_data.item_data is ItemDataEquipFeet:
 		var item: ItemDataEquipFeet = slot_data.item_data
 		player.apply_feet_item(item)
 	else:
-		# brak itemu w slocie -> wracamy do domyślnego mesha + materiału
 		player.apply_feet_item(null)
 		
 func _on_legs_inventory_updated(_inv) -> void:
 	_update_legs_visual()
-
 
 func _update_legs_visual() -> void:
 	var legs_inventory = equip_inventory_legs
@@ -216,7 +219,6 @@ func _update_legs_visual() -> void:
 func _on_torso_inventory_updated(_inv) -> void:
 	_update_torso_visual()
 
-
 func _update_torso_visual() -> void:
 	var torso_inventory = equip_inventory_torso
 	var slot_data: SlotData = torso_inventory.slot_datas[0]
@@ -229,7 +231,6 @@ func _update_torso_visual() -> void:
 
 func _on_hands_inventory_updated(_inv) -> void:
 	_update_hands_visual()
-
 
 func _update_hands_visual() -> void:
 	var hands_inventory = equip_inventory_hands
@@ -244,7 +245,6 @@ func _update_hands_visual() -> void:
 
 func _on_head_inventory_updated(_inv) -> void:
 	_update_head_visual()
-
 
 func _update_head_visual() -> void:
 	var head_inventory = equip_inventory_head

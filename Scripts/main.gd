@@ -1,10 +1,12 @@
 extends Node3D
 
+# Referencje do postaci gracza oraz elementów interfejsu (głównego ekwipunku i paska skrótów)
 @onready var main_character: CharacterBody3D = $MainCharacter
 @onready var inventory_interface: Control = $UI/InventoryInterface
 @onready var hot_bar_inventory: PanelContainer = $UI/HotBarInventory
 
 func _ready() -> void:
+	# Inicjalizuje połączenia sygnałów, przekazuje dane ekwipunku i wyposażenia do UI oraz ukrywa kursor
 	main_character.toggle_inventory.connect(toggle_inventory_interface)
 	inventory_interface.set_player_inventory_data(main_character.inventory_data)
 	inventory_interface.set_equip_inventory_head(main_character.equip_inventory_head)
@@ -25,6 +27,7 @@ func _ready() -> void:
 			node.toggle_inventory.connect(toggle_inventory_interface)
 
 func toggle_inventory_interface(external_inventory_owner = null) -> void:
+	# Przełącza widoczność ekwipunku, zarządza zewnętrznymi kontenerami (skrzynie) i trybem kursora myszy
 	inventory_interface.visible = not inventory_interface.visible
 
 	if inventory_interface.visible and external_inventory_owner:
@@ -38,4 +41,3 @@ func toggle_inventory_interface(external_inventory_owner = null) -> void:
 	else:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		hot_bar_inventory.show()
-		

@@ -20,3 +20,8 @@ res://Scripts/UI/CharacterCreator.gd
 res://Scripts/Player/controllers/face_texture_change.gd
 res://Scripts/Player/controllers/animation_controller.gd
 res://Scenes/UI/CameraGenderAdjuster.gd
+res://Scenes/UI/PauseMenu.gd
+res://Scenes/world/test_world.tscn
+res://Scripts/main.gd
+res://Scenes/UI/PauseMenu.tscn
+res://Scenes/Player/character_controller/player_controller.tscn

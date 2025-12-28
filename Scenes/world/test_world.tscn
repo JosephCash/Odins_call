@@ -1,4 +1,4 @@
-[gd_scene load_steps=45 format=3 uid="uid://dfbctbhmnfnqk"]
+[gd_scene load_steps=46 format=3 uid="uid://dfbctbhmnfnqk"]
 
 [ext_resource type="PackedScene" uid="uid://bs5cxi0sbahk2" path="res://Scenes/Player/character_controller/player_controller.tscn" id="1_bwvnj"]
 [ext_resource type="Script" uid="uid://ckrn2il06n3rs" path="res://Scripts/main.gd" id="1_snt32"]
@@ -21,6 +21,7 @@
 [ext_resource type="Script" uid="uid://cflo6ohrkfem6" path="res://Scripts/Inventory/inventory_data_equip_trinket1.gd" id="12_cfml5"]
 [ext_resource type="Script" uid="uid://bus53uukwc37" path="res://Scripts/Inventory/inventory_data_equip_trinket2.gd" id="13_cfml5"]
 [ext_resource type="Script" uid="uid://tb5nk8f62x4t" path="res://Scripts/Inventory/inventory_data_equip_trinket3.gd" id="14_657gw"]
+[ext_resource type="PackedScene" uid="uid://ca00t3br1m1wu" path="res://Scenes/UI/PauseMenu.tscn" id="20_657gw"]
 
 [sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_bwvnj"]
 
@@ -340,6 +341,9 @@ offset_left = 10.0
 offset_top = 10.0
 offset_right = 294.0
 offset_bottom = 90.0
+
+[node name="PauseMenu" parent="UI" instance=ExtResource("20_657gw")]
+visible = false
 
 [node name="Chest" parent="." groups=["external_inventory"] instance=ExtResource("5_3bb5u")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.434839, 0, 3.6607308)

@@ -5,13 +5,13 @@
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_vqi2o"]
 radius = 0.3
-height = 1.67
+height = 1.75
 
 [node name="MainCharacter" type="CharacterBody3D"]
 script = ExtResource("1_vqi2o")
 
 [node name="CharacterColBox" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.83409065, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.874, 0)
 shape = SubResource("CapsuleShape3D_vqi2o")
 
 [node name="WorldModel" type="Node3D" parent="."]

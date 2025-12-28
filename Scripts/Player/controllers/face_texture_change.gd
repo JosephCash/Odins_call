@@ -1,60 +1,95 @@
 extends Node3D
 
-# Konfiguracja ścieżek, tekstur oczu oraz interwałów czasowych mrugania
-@export var face_mesh_path: NodePath = ^"Face"
+# --- KONFIGURACJA ŚCIEŻEK ---
+@export var face_mesh_path_female: NodePath = ^"../WorldModel/Player/Female_character_skeletalmesh/Armature/Skeleton3D/HeadSlot/Head"
+@export var face_mesh_path_male: NodePath = ^"../WorldModel/Player/Male_character_skeletalmesh/Armature/Skeleton3D/HeadSlot/Head"
 @export var surface_index: int = 0
-@export var normal_tex: Texture2D
-@export var closed_eyes_tex: Texture2D
+
+# --- TEKSTURY DAMSKIE ---
+@export_group("Female Textures")
+@export var female_normal_tex: Texture2D
+@export var female_closed_eyes_tex: Texture2D
+
+# --- TEKSTURY MĘSKIE ---
+@export_group("Male Textures")
+@export var male_normal_tex: Texture2D
+@export var male_closed_eyes_tex: Texture2D
+
+# --- USTAWIENIA CZASOWE ---
 @export var interval: float = 5.0
 @export var blink_duration: float = 0.2
 
-# Przechowuje referencje do obiektu mesha i jego unikalnej instancji materiału
-var face_mesh: MeshInstance3D
-var mat: Material
+# Zmienne wewnętrzne
+var face_mesh_female: MeshInstance3D
+var face_mesh_male: MeshInstance3D
+var current_gender: String = "female"
 
 func _ready():
-	# Próbuje pobrać węzeł mesha ze ścieżki lub szuka dziecka o nazwie "Face" jako fallback
-	if has_node(face_mesh_path):
-		face_mesh = get_node(face_mesh_path) as MeshInstance3D
-	else:
-		face_mesh = find_child("Face", true)
-		if not face_mesh:
-			print("BŁĄD: Nie znaleziono mesha twarzy w face_texture_change.gd")
-			return
-
-	# Pobiera i duplikuje materiał, aby mruganie jednej postaci nie wpływało na inne (unikalność)
-	var base_mat = face_mesh.get_active_material(surface_index)
+	# Znajdź oba meshe na starcie
+	if has_node(face_mesh_path_female):
+		face_mesh_female = get_node(face_mesh_path_female) as MeshInstance3D
 	
-	if base_mat:
-		mat = base_mat.duplicate()
-		face_mesh.set_surface_override_material(surface_index, mat)
-		
-		# Jeśli brak przypisanej tekstury, automatycznie pobiera ją z materiału (obsługuje Standard i Shader)
-		if normal_tex == null:
-			if mat is StandardMaterial3D:
-				normal_tex = mat.albedo_texture
-			elif mat is ShaderMaterial:
-				normal_tex = mat.get_shader_parameter("texture_albedo")
-	else:
-		print("BŁĄD: Mesh twarzy nie ma przypisanego materiału!")
-		return
+	if has_node(face_mesh_path_male):
+		face_mesh_male = get_node(face_mesh_path_male) as MeshInstance3D
 
+	# Rozpocznij pętlę mrugania
 	_blink_loop()
 
 func _blink_loop() -> void:
-	# Cykliczna pętla: czeka interwał, zamyka oczy, czeka czas mrugnięcia, otwiera oczy i powtarza
+	# Czekamy na następne mrugnięcie
 	await get_tree().create_timer(interval).timeout
-	_set_texture(closed_eyes_tex)
+	
+	# --- KLUCZOWA ZMIANA ---
+	# Sprawdzamy, który mesh jest faktycznie widoczny w drzewie sceny.
+	# To naprawia problem w kreatorze postaci, gdzie PlayerManager ma stare dane.
+	if face_mesh_female and face_mesh_female.is_visible_in_tree():
+		current_gender = "female"
+	elif face_mesh_male and face_mesh_male.is_visible_in_tree():
+		current_gender = "male"
+	else:
+		# Fallback do Managera (np. w grze FPP, gdy modelu nie widać, ale chcemy mieć poprawne dane)
+		var data = PlayerManager.get_appearance_data()
+		if data.has("gender"):
+			current_gender = data["gender"]
+	
+	# Zamknij oczy
+	_apply_texture_to_active(true)
+	
 	await get_tree().create_timer(blink_duration).timeout
-	_set_texture(normal_tex)
+	
+	# Otwórz oczy
+	_apply_texture_to_active(false)
+	
+	# Powtórz pętlę
 	_blink_loop()
 
-func _set_texture(tex: Texture2D) -> void:
-	# Przypisuje teksturę do odpowiedniego parametru w zależności od typu materiału (Standard/Shader)
-	if not mat or not tex:
-		return
+func _apply_texture_to_active(closed: bool) -> void:
+	var target_mesh: MeshInstance3D
+	var target_tex: Texture2D
+	
+	# Wybór mesha i tekstury na podstawie wykrytej płci
+	if current_gender == "male":
+		target_mesh = face_mesh_male
+		target_tex = male_closed_eyes_tex if closed else male_normal_tex
+	else:
+		target_mesh = face_mesh_female
+		target_tex = female_closed_eyes_tex if closed else female_normal_tex
+	
+	# Aplikacja tekstury
+	if target_mesh and target_tex:
+		# Pobierz lub stwórz override material
+		var mat = target_mesh.get_surface_override_material(surface_index)
+		if not mat:
+			var base_mat = target_mesh.get_active_material(surface_index)
+			if base_mat:
+				mat = base_mat.duplicate()
+				target_mesh.set_surface_override_material(surface_index, mat)
 		
-	if mat is StandardMaterial3D:
-		mat.albedo_texture = tex
-	elif mat is ShaderMaterial:
-		mat.set_shader_parameter("texture_albedo", tex)
+		# Przypisz teksturę do odpowiedniego parametru
+		if mat:
+			if mat is StandardMaterial3D:
+				mat.albedo_texture = target_tex
+			elif mat is ShaderMaterial:
+				# Dla ShaderMaterial używamy parametru 'texture_albedo' (standard w Godot)
+				# Jeśli Twój shader używa innej nazwy (np. 'albedo'), zmień to tutaj!
+				mat.set_shader_parameter("texture_albedo", target_tex)

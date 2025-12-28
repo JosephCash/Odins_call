@@ -5,6 +5,11 @@ extends Node3D
 
 # --- USTAWIENIA UI ---
 # Grupy zmiennych eksportowanych do przypisania przycisków i kontenerów w edytorze
+
+@export_group("Gender Selection")
+@export var btn_gender_male: Button
+@export var btn_gender_female: Button
+
 @export_group("Navigation Buttons")
 @export var btn_hair_next: Button
 @export var btn_hair_prev: Button
@@ -19,6 +24,10 @@ extends Node3D
 # Parametry sterujące czułością i stanem obracania modelu myszką
 @export var rotation_sensitivity: float = 0.005
 var is_dragging: bool = false 
+
+# --- USTAWIENIA OFFSETU KAMERY ---
+@export_group("Scene References")
+@export var camera_controller: Camera3D # Tu przypniemy naszą kamerę ze skryptem
 
 # --- DOMYŚLNE DANE ---
 # Słownik przechowujący aktualny stan wyboru wyglądu postaci
@@ -35,6 +44,11 @@ func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	await get_tree().process_frame
 	
+	# Podpięcie przycisków płci
+	if btn_gender_male:   btn_gender_male.pressed.connect(func(): _on_gender_selected("male"))
+	if btn_gender_female: btn_gender_female.pressed.connect(func(): _on_gender_selected("female"))
+	
+	# Podpięcie przycisków nawigacji
 	if btn_hair_next: btn_hair_next.pressed.connect(_on_hair_next_pressed)
 	if btn_hair_prev: btn_hair_prev.pressed.connect(_on_hair_prev_pressed)
 	if btn_start:     btn_start.pressed.connect(_on_start_game_pressed)
@@ -63,9 +77,19 @@ func _ready():
 	else:
 		printerr("UWAGA: Nie przypisano skin_colors_container!")
 
+	# Inicjalne odświeżenie wyglądu
 	_update_preview()
 
 # --- FUNKCJE WYBORU ---
+
+# Nowa funkcja: zmiana płci
+func _on_gender_selected(gender_id: String):
+	current_settings["gender"] = gender_id
+	_update_preview()
+	
+	if camera_controller and camera_controller.has_method("move_to_gender"):
+			camera_controller.move_to_gender(gender_id)
+
 # Aktualizuje wybrany kolor (włosy/oczy/skóra) w słowniku i odświeża podgląd
 func _on_hair_color_selected(color_id: String):
 	current_settings["hair_color_id"] = color_id

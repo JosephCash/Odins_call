@@ -1,7 +1,8 @@
 extends Node3D
 
 # Referencje do drzewa animacji
-@export var animation_tree_path: NodePath = ^"../AnimationTree"
+@export var animation_tree: AnimationTree 
+
 
 var state_machine_locomotion: AnimationNodeStateMachinePlayback
 var player: CharacterBody3D
@@ -16,7 +17,7 @@ var jump_now: bool = false
 func _ready():
 	# Pobiera referencję do gracza oraz obiekt kontrolujący odtwarzanie animacji (playback)
 	player = PlayerManager.player as CharacterBody3D
-	state_machine_locomotion = %AnimationTree.get("parameters/Locomotion/playback") as AnimationNodeStateMachinePlayback
+	state_machine_locomotion = animation_tree.get("parameters/Locomotion/playback") as AnimationNodeStateMachinePlayback
 
 func _physics_process(_delta: float) -> void:
 	# Zabezpieczenie: sprawdza czy gracz istnieje, jeśli nie – próbuje go pobrać lub przerywa funkcję
@@ -46,6 +47,6 @@ func AnimUpdate():
 	jump_now = Input.is_action_just_pressed("jump") and grounded
 
 	# Przekazuje obliczone warunki i wartości prędkości do parametrów w AnimationTree
-	%AnimationTree.set("parameters/Locomotion/conditions/fall", not grounded and not jump_now)
-	%AnimationTree.set("parameters/Locomotion/conditions/idle_jog", grounded)
-	%AnimationTree.set("parameters/Locomotion/Idle_to_jog/blend_position", normalized_horizontal_speed)
+	animation_tree.set("parameters/Locomotion/conditions/fall", not grounded and not jump_now)
+	animation_tree.set("parameters/Locomotion/conditions/idle_jog", grounded)
+	animation_tree.set("parameters/Locomotion/Idle_to_jog/blend_position", normalized_horizontal_speed)

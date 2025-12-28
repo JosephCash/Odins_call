@@ -1,42 +1,41 @@
 extends Node3D
 
-# --- REFERENCJE DO MESH'Y CZĘŚCI CIAŁA ---
-# Przechowujemy referencje do aktywnych MeshInstance3D oraz ich domyślne stany (gdy postać jest naga)
-@onready var feet_mesh: MeshInstance3D = $Female_character_skeletalmesh/Armature/Skeleton3D/FeetSlot/Feet
-var default_feet_mesh: Mesh
-var default_feet_material: Material
+# --- KONFIGURACJA PŁCI I REFERENCJE GŁÓWNE ---
+var current_gender: String = "female"
 
-@onready var legs_mesh: MeshInstance3D = $Female_character_skeletalmesh/Armature/Skeleton3D/LegsSlot/Legs
-var default_legs_mesh: Mesh
-var default_legs_material: Material
+@onready var female_root = $Female_character_skeletalmesh
+@onready var male_root = $Male_character_skeletalmesh
 
-@onready var torso_mesh: MeshInstance3D = $Female_character_skeletalmesh/Armature/Skeleton3D/TorsoSlot/Torso
-var default_torso_mesh: Mesh
-var default_torso_material: Material
+# --- KONFIGURACJA ŚCIEŻEK ---
+@export var skeleton_path: String = "Armature/Skeleton3D"
+@export var hair_attachment_path: String = "Armature/Skeleton3D/HeadAttachment"
 
-@onready var hands_mesh: MeshInstance3D = $Female_character_skeletalmesh/Armature/Skeleton3D/HandsSlot/Hands
-var default_hands_mesh: Mesh
-var default_hands_material: Material
-
-@onready var head_mesh: MeshInstance3D = $Female_character_skeletalmesh/Armature/Skeleton3D/HeadSlot/Head
-var default_head_mesh: Mesh
-var default_head_material: Material
-
-
-# --- REFERENCJE DO KREATORA (Twarz i Włosy) ---
-@export var face_mesh_ref: MeshInstance3D 
-@export var hair_attachment_point: Node3D
-@export var hair_scenes: Array[PackedScene]
-
+# --- ZMIENNE AKTYWNE ---
+var feet_mesh: MeshInstance3D
+var legs_mesh: MeshInstance3D
+var torso_mesh: MeshInstance3D
+var hands_mesh: MeshInstance3D
+var head_mesh: MeshInstance3D       # Mesh głowy (do ubierania hełmów)
+var face_mesh_ref: MeshInstance3D   # OSOBNY Mesh twarzy (do kolorów oczu/brwi)
 var hair_mesh: MeshInstance3D 
 
+var active_hair_attachment: Node3D 
+
+# --- DANE DOMYŚLNE ---
+var default_data = {
+	"female": {"feet": {}, "legs": {}, "torso": {}, "hands": {}, "head": {}},
+	"male":   {"feet": {}, "legs": {}, "torso": {}, "hands": {}, "head": {}},
+}
+
+# --- LISTY FRYZUR ---
+@export var hair_scenes: Array[PackedScene]      # Damskie
+@export var male_hair_scenes: Array[PackedScene] # Męskie
 
 # --- DANE KOSMETYCZNE ---
 var current_hair_type: int = 1 
 var current_hair_color: String = "blonde"
 var current_skin_id: String = "Default"
 
-# Słownik presetów skóry: definiuje kolory dla cieniowania (Light/Mid/Dark) oraz tint ust
 var skin_presets = {
 	"Default":   {"light": Color("eba697"), "mid": Color("de9a8f"), "dark": Color("be7e71"), "lips": 0.0},
 	"Pale":      {"light": Color("ecc1ba"), "mid": Color("e8b6ac"), "dark": Color("cc9992"), "lips": -0.3},
@@ -46,7 +45,6 @@ var skin_presets = {
 	"Dark":      {"light": Color("a17263"), "mid": Color("946354"), "dark": Color("704437"), "lips": 0.2}
 }
 
-# Paleta kolorów brwi
 var eyebrow_palette = {
 	"blonde": Color(0.67, 0.46, 0.34),
 	"black": Color(0.12, 0.12, 0.12),
@@ -55,7 +53,6 @@ var eyebrow_palette = {
 	"white": Color(0.6, 0.6, 0.6)
 }
 
-# Paleta oczu (przesunięcia HSV w shaderze)
 var eye_palette = {
 	"blue":      {"h": 0.0,   "s": 0.0,   "v": 0.0},
 	"green":     {"h": -0.35, "s": 0.2,   "v": -0.1},
@@ -67,40 +64,51 @@ var eye_palette = {
 
 
 func _ready() -> void:
-	# Zapisuje domyślne zasoby (by móc do nich wrócić po zdjęciu zbroi)
-	default_feet_mesh = feet_mesh.mesh
-	default_feet_material = feet_mesh.get_active_material(0)
-	default_legs_mesh = legs_mesh.mesh
-	default_legs_material = legs_mesh.get_active_material(0)
-	default_torso_mesh = torso_mesh.mesh
-	default_torso_material = torso_mesh.get_active_material(0)
-	default_hands_mesh = hands_mesh.mesh
-	default_hands_material = hands_mesh.get_active_material(0)
-	default_head_mesh = head_mesh.mesh
-	default_head_material = head_mesh.get_active_material(0)
+	await get_tree().process_frame
+	
+	_initialize_references("female", female_root)
+	_initialize_references("male", male_root)
 
-	# Znajduje mesh włosów w drzewie sceny
-	if hair_attachment_point and hair_attachment_point.get_child_count() > 0:
-		var current_hair_node = hair_attachment_point.get_child(0)
-		hair_mesh = _find_mesh_recursive(current_hair_node, "Hair")
+	var data = PlayerManager.get_appearance_data()
+	apply_appearance(data)
 
-	# Aplikuje zapisany wygląd z globalnego managera
-	apply_appearance(PlayerManager.get_appearance_data())
+
+func _initialize_references(gender_key: String, root_node: Node3D) -> void:
+	if not root_node: return
+		
+	var full_skel_path = skeleton_path
+	if not full_skel_path.ends_with("/"): full_skel_path += "/"
+	
+	var f_feet = root_node.get_node_or_null(full_skel_path + "FeetSlot/Feet")
+	var f_legs = root_node.get_node_or_null(full_skel_path + "LegsSlot/Legs")
+	var f_torso = root_node.get_node_or_null(full_skel_path + "TorsoSlot/Torso")
+	var f_hands = root_node.get_node_or_null(full_skel_path + "HandsSlot/Hands")
+	var f_head = root_node.get_node_or_null(full_skel_path + "HeadSlot/Head")
+	
+	if f_feet: default_data[gender_key]["feet"] = {"mesh": f_feet.mesh, "mat": f_feet.get_active_material(0)}
+	if f_legs: default_data[gender_key]["legs"] = {"mesh": f_legs.mesh, "mat": f_legs.get_active_material(0)}
+	if f_torso: default_data[gender_key]["torso"] = {"mesh": f_torso.mesh, "mat": f_torso.get_active_material(0)}
+	if f_hands: default_data[gender_key]["hands"] = {"mesh": f_hands.mesh, "mat": f_hands.get_active_material(0)}
+	if f_head: default_data[gender_key]["head"] = {"mesh": f_head.mesh, "mat": f_head.get_active_material(0)}
 
 
 func apply_appearance(data: Dictionary) -> void:
-	# Główna funkcja sterująca wyglądem - rozdziela dane na odpowiednie podsystemy
 	if data.is_empty(): return
+
+	if data.has("gender"):
+		set_gender(data["gender"])
+	elif current_gender == "":
+		set_gender("female")
 
 	if data.has("hair_type"):
 		var new_type = int(data["hair_type"])
 		if new_type != current_hair_type or hair_mesh == null:
 			current_hair_type = new_type
 			change_hair_model(current_hair_type)
-
+	
 	if data.has("hair_color_id"):
 		current_hair_color = data["hair_color_id"]
-		update_hair_texture()
+		if hair_mesh: update_hair_texture()
 		update_eyebrow_color(current_hair_color)
 		
 	if data.has("eye_color_id"):
@@ -111,37 +119,77 @@ func apply_appearance(data: Dictionary) -> void:
 		refresh_all_skin_materials()
 
 
-func change_hair_model(type_index: int) -> void:
-	# Usuwa stare włosy i instancjonuje nową scenę fryzury
-	if not hair_attachment_point: return
+func set_gender(new_gender: String) -> void:
+	if new_gender != "female" and new_gender != "male": return
+	current_gender = new_gender
+	
+	if female_root: female_root.visible = (current_gender == "female")
+	if male_root:   male_root.visible   = (current_gender == "male")
+	
+	var active_root = female_root if current_gender == "female" else male_root
+	if not active_root: return
+	
+	var full_skel_path = skeleton_path
+	if not full_skel_path.ends_with("/"): full_skel_path += "/"
+	
+	# 1. Aktualizacja referencji ekwipunku
+	feet_mesh  = active_root.get_node_or_null(full_skel_path + "FeetSlot/Feet")
+	legs_mesh  = active_root.get_node_or_null(full_skel_path + "LegsSlot/Legs")
+	torso_mesh = active_root.get_node_or_null(full_skel_path + "TorsoSlot/Torso")
+	hands_mesh = active_root.get_node_or_null(full_skel_path + "HandsSlot/Hands")
+	head_mesh  = active_root.get_node_or_null(full_skel_path + "HeadSlot/Head")
+	
+	# 2. Szukanie OSOBNEGO mesha twarzy (Face)
+	# Szukamy rekurencyjnie węzła, który ma w nazwie "Face" (wielkość liter nie ma znaczenia w contains jeśli nazwy są poprawne)
+	face_mesh_ref = _find_mesh_recursive(active_root, "Face")
+	
+	# Debug: Sprawdź czy znaleziono
+	if not face_mesh_ref:
+		printerr("UWAGA: Nie znaleziono mesha o nazwie 'Face' u ", current_gender, "! Kolory oczu mogą nie działać.")
+	
+	# 3. Włosy
+	active_hair_attachment = active_root.get_node_or_null(hair_attachment_path)
+	hair_mesh = null
+	if active_hair_attachment and active_hair_attachment.get_child_count() > 0:
+		var current_hair_node = active_hair_attachment.get_child(0)
+		hair_mesh = _find_mesh_recursive(current_hair_node, "Hair")
+		if not hair_mesh:
+			hair_mesh = _find_mesh_recursive(current_hair_node, "")
+	else:
+		change_hair_model(current_hair_type)
 		
-	for child in hair_attachment_point.get_children():
+	# Odśwież skin na nowej twarzy
+	refresh_all_skin_materials()
+
+func change_hair_model(type_index: int) -> void:
+	if not active_hair_attachment: return
+	
+	for child in active_hair_attachment.get_children():
 		child.queue_free()
 	
+	var scenes_list = hair_scenes if current_gender == "female" else male_hair_scenes
 	var array_index = type_index - 1
-	if hair_scenes != null and array_index >= 0 and array_index < hair_scenes.size():
-		var scene_to_spawn = hair_scenes[array_index]
+	
+	if scenes_list != null and array_index >= 0 and array_index < scenes_list.size():
+		var scene_to_spawn = scenes_list[array_index]
 		if scene_to_spawn:
 			var new_hair_node = scene_to_spawn.instantiate()
-			hair_attachment_point.add_child(new_hair_node)
-			
+			active_hair_attachment.add_child(new_hair_node)
 			hair_mesh = _find_mesh_recursive(new_hair_node, "Hair")
-			if not hair_mesh:
-				hair_mesh = _find_mesh_recursive(new_hair_node, "")
+			if not hair_mesh: hair_mesh = _find_mesh_recursive(new_hair_node, "")
+			update_hair_texture()
 
 func update_hair_texture() -> void:
-	# Ładuje teksturę albedo dla włosów na podstawie typu i koloru
 	if not hair_mesh: return
-
+	var gender_prefix = "female" # Możesz zmienić na current_gender jeśli męskie włosy mają mieć inne tekstury
+	
 	var base_path = "res://Assets/Resources/textures/FemaleCharacter/Hair/"
-	var texture_name = "t_female_hair" + str(current_hair_type) + "_" + current_hair_color + ".png"
+	var texture_name = "t_" + gender_prefix + "_hair" + str(current_hair_type) + "_" + current_hair_color + ".png"
 	var full_path = base_path + texture_name
 	
 	if ResourceLoader.exists(full_path):
 		var new_texture = load(full_path)
 		var current_mat = hair_mesh.get_active_material(0) as StandardMaterial3D
-		
-		# Używa surface_override, aby nie psuć oryginalnego zasobu materiału
 		if current_mat:
 			if hair_mesh.get_surface_override_material(0) == null:
 				var mat_copy = current_mat.duplicate()
@@ -150,14 +198,10 @@ func update_hair_texture() -> void:
 			else:
 				hair_mesh.get_surface_override_material(0).albedo_texture = new_texture
 
-
-# --- LOGIKA SKÓRY (SHADER PARAMETERS) ---
+# --- LOGIKA SKÓRY ---
 
 func refresh_all_skin_materials() -> void:
-	# Przesyła parametry koloru skóry do WSZYSTKICH części ciała
-	if not skin_presets.has(current_skin_id):
-		current_skin_id = "Default"
-	
+	if not skin_presets.has(current_skin_id): current_skin_id = "Default"
 	var colors = skin_presets[current_skin_id]
 	
 	if head_mesh: _inject_colors_to_mesh(head_mesh, colors)
@@ -166,15 +210,18 @@ func refresh_all_skin_materials() -> void:
 	if hands_mesh: _inject_colors_to_mesh(hands_mesh, colors)
 	if feet_mesh: _inject_colors_to_mesh(feet_mesh, colors)
 	
+	# Ważne: Twarz też musi dostać kolor skóry (oraz usta)
 	if face_mesh_ref: _inject_colors_to_mesh(face_mesh_ref, colors)
 
 func _inject_colors_to_mesh(mesh_instance: MeshInstance3D, colors: Dictionary) -> void:
-	# Ustawia parametry shader uniform (skin_light, skin_mid, etc.) dla danego mesha
-	var mat_count = mesh_instance.get_surface_override_material_count()
-	if mat_count == 0 and mesh_instance.mesh:
-		mat_count = mesh_instance.mesh.get_surface_count()
-		
-	for i in range(mat_count):
+	# Pobieramy get_active_material, który uwzględnia override (stworzony np. przez skrypt mrugania)
+	var check_count = 1
+	if mesh_instance.mesh: check_count = mesh_instance.mesh.get_surface_count()
+	# Sprawdź też override, jeśli istnieje
+	if mesh_instance.get_surface_override_material_count() > 0:
+		check_count = max(check_count, mesh_instance.get_surface_override_material_count())
+
+	for i in range(check_count):
 		var mat = mesh_instance.get_active_material(i)
 		
 		if mat is ShaderMaterial:
@@ -182,101 +229,53 @@ func _inject_colors_to_mesh(mesh_instance: MeshInstance3D, colors: Dictionary) -
 			mat.set_shader_parameter("skin_mid",   colors["mid"])
 			mat.set_shader_parameter("skin_dark",  colors["dark"])
 			
-			# Parametr "lips" ustawiamy tylko dla twarzy
+			# Parametr "lips" ustawiamy TYLKO dla twarzy (face_mesh_ref)
 			if mesh_instance == face_mesh_ref:
-				var lip_val = colors.get("lips", 0.0)
-				mat.set_shader_parameter("lip_darkness", lip_val)
+				mat.set_shader_parameter("lip_darkness", colors.get("lips", 0.0))
 
-
-# --- LOGIKA TWARZY (SHADER PARAMETERS) ---
+# --- LOGIKA TWARZY (OCZY I BRWI) ---
 
 func update_eyebrow_color(color_id: String) -> void:
-	var target_mesh = head_mesh
-	if face_mesh_ref: target_mesh = face_mesh_ref
-	if not target_mesh: return
+	# Celujemy tylko w FACE MESH
+	if not face_mesh_ref: return
 	
-	var mat = target_mesh.get_active_material(0)
+	var mat = face_mesh_ref.get_active_material(0)
 	if mat is ShaderMaterial and eyebrow_palette.has(color_id):
 		mat.set_shader_parameter("new_eyebrow_color", eyebrow_palette[color_id])
 
-
 func update_eye_color(color_id: String) -> void:
-	var target_mesh = head_mesh
-	if face_mesh_ref: target_mesh = face_mesh_ref
-	if not target_mesh: return
+	# Celujemy tylko w FACE MESH
+	if not face_mesh_ref: return
 	
-	var mat = target_mesh.get_active_material(0)
+	var mat = face_mesh_ref.get_active_material(0)
 	if mat is ShaderMaterial and eye_palette.has(color_id):
 		var val = eye_palette[color_id]
 		mat.set_shader_parameter("eye_hue_shift", val["h"])
 		mat.set_shader_parameter("eye_sat_shift", val["s"])
 		mat.set_shader_parameter("eye_val_shift", val["v"])
 
-
 func _find_mesh_recursive(node: Node, target_name_part: String) -> MeshInstance3D:
 	if node is MeshInstance3D:
-		if target_name_part == "" or node.name.contains(target_name_part):
-			return node
+		if target_name_part == "" or node.name.contains(target_name_part): return node
 	for child in node.get_children():
 		var res = _find_mesh_recursive(child, target_name_part)
 		if res: return res
 	return null
 
+# --- EKWIPUNEK ---
+func apply_feet_item(item): _apply_item(item, feet_mesh, "feet")
+func apply_legs_item(item): _apply_item(item, legs_mesh, "legs")
+func apply_torso_item(item): _apply_item(item, torso_mesh, "torso")
+func apply_hands_item(item): _apply_item(item, hands_mesh, "hands")
+func apply_head_item(item): _apply_item(item, head_mesh, "head")
 
-# --- SYSTEM EKWIPUNKU (WIZUALIZACJA) ---
-# Każda funkcja podmienia mesh/materiał ALBO wraca do domyślnego, a następnie odświeża kolor skóry
-
-func apply_feet_item(item: ItemDataEquipFeet) -> void:
+func _apply_item(item, mesh_ref, part_key):
+	if not mesh_ref: return
+	var def = default_data[current_gender][part_key]
 	if item:
-		if item.mesh: feet_mesh.mesh = item.mesh
-		else: feet_mesh.mesh = default_feet_mesh
-		if item.material: feet_mesh.set_surface_override_material(0, item.material)
-		else: feet_mesh.set_surface_override_material(0, default_feet_material)
+		mesh_ref.mesh = item.mesh if item.mesh else def.get("mesh")
+		mesh_ref.set_surface_override_material(0, item.material if item.material else def.get("mat"))
 	else:
-		feet_mesh.mesh = default_feet_mesh
-		feet_mesh.set_surface_override_material(0, default_feet_material)
-	refresh_all_skin_materials() 
-
-func apply_legs_item(item: ItemDataEquipLegs) -> void:
-	if item:
-		if item.mesh: legs_mesh.mesh = item.mesh
-		else: legs_mesh.mesh = default_legs_mesh
-		if item.material: legs_mesh.set_surface_override_material(0, item.material)
-		else: legs_mesh.set_surface_override_material(0, default_legs_material)
-	else:
-		legs_mesh.mesh = default_legs_mesh
-		legs_mesh.set_surface_override_material(0, default_legs_material)
-	refresh_all_skin_materials()
-
-func apply_torso_item(item: ItemDataEquipTorso) -> void:
-	if item:
-		if item.mesh: torso_mesh.mesh = item.mesh
-		else: torso_mesh.mesh = default_torso_mesh
-		if item.material: torso_mesh.set_surface_override_material(0, item.material)
-		else: torso_mesh.set_surface_override_material(0, default_torso_material)
-	else:
-		torso_mesh.mesh = default_torso_mesh
-		torso_mesh.set_surface_override_material(0, default_torso_material)
-	refresh_all_skin_materials()
-
-func apply_hands_item(item: ItemDataEquipHands) -> void:
-	if item:
-		if item.mesh: hands_mesh.mesh = item.mesh
-		else: hands_mesh.mesh = default_hands_mesh
-		if item.material: hands_mesh.set_surface_override_material(0, item.material)
-		else: hands_mesh.set_surface_override_material(0, default_hands_material)
-	else:
-		hands_mesh.mesh = default_hands_mesh
-		hands_mesh.set_surface_override_material(0, default_hands_material)
-	refresh_all_skin_materials()
-
-func apply_head_item(item: ItemDataEquipHead) -> void:
-	if item:
-		if item.mesh: head_mesh.mesh = item.mesh
-		else: head_mesh.mesh = default_head_mesh
-		if item.material: head_mesh.set_surface_override_material(0, item.material)
-		else: head_mesh.set_surface_override_material(0, default_head_material)
-	else:
-		head_mesh.mesh = default_head_mesh
-		head_mesh.set_surface_override_material(0, default_head_material)
+		mesh_ref.mesh = def.get("mesh")
+		mesh_ref.set_surface_override_material(0, def.get("mat"))
 	refresh_all_skin_materials()

@@ -1,0 +1,10 @@
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://kchpo8e45i3f"]
+
+[ext_resource type="Texture2D" uid="uid://debjf75wl02qb" path="res://Assets/Resources/textures/MaleCharacter/Hair/t_male_hair1_brown.png" id="1_laqc4"]
+
+[resource]
+transparency = 1
+cull_mode = 2
+shading_mode = 0
+albedo_texture = ExtResource("1_laqc4")
+texture_filter = 2

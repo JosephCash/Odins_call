@@ -1,0 +1,10 @@
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://dgkkejyjpmssu"]
+
+[ext_resource type="Texture2D" uid="uid://dbdcy1mfftqnq" path="res://Assets/Resources/textures/MaleCharacter/Hair/t_male_hair1_orange.png" id="1_bu656"]
+
+[resource]
+transparency = 1
+cull_mode = 2
+shading_mode = 0
+albedo_texture = ExtResource("1_bu656")
+texture_filter = 2

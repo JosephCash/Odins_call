@@ -3,7 +3,7 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dtsmfefnbxx6y"
+uid="uid://u2exw57r7moh"
 path="res://.godot/imported/Male_character_skeletal_mesh.glb-26c70040642e716338e5b1c1e9959fe9.scn"
 
 [deps]
@@ -46,7 +46,7 @@ _subresources={
 "lods/normal_merge_angle": 20.0,
 "save_to_file/enabled": true,
 "save_to_file/fallback_path": "res://Assets/Resources/Mesh/MaleCharacter/Body/Feet.res",
-"save_to_file/path": "uid://ce4epkopax8lf"
+"save_to_file/path": "uid://brpaj41i4dpue"
 },
 "Male_character_skeletal_mesh_Plane_001": {
 "generate/lightmap_uv": 0,
@@ -55,7 +55,7 @@ _subresources={
 "lods/normal_merge_angle": 20.0,
 "save_to_file/enabled": true,
 "save_to_file/fallback_path": "res://Assets/Resources/Mesh/MaleCharacter/Body/Head.res",
-"save_to_file/path": "uid://ded46pr70sfq0"
+"save_to_file/path": "uid://cjpdse1k3f10x"
 },
 "Male_character_skeletal_mesh_Plane_002": {
 "generate/lightmap_uv": 0,
@@ -64,7 +64,7 @@ _subresources={
 "lods/normal_merge_angle": 20.0,
 "save_to_file/enabled": true,
 "save_to_file/fallback_path": "res://Assets/Resources/Mesh/MaleCharacter/Body/Torso.res",
-"save_to_file/path": "uid://c0mpxiqtaxh3a"
+"save_to_file/path": "uid://d08so6s18u2g"
 },
 "Male_character_skeletal_mesh_Plane_004": {
 "generate/lightmap_uv": 0,
@@ -73,7 +73,7 @@ _subresources={
 "lods/normal_merge_angle": 20.0,
 "save_to_file/enabled": true,
 "save_to_file/fallback_path": "res://Assets/Resources/Mesh/MaleCharacter/Body/Legs.res",
-"save_to_file/path": "uid://bdcookvdl0tf1"
+"save_to_file/path": "uid://dho0i5b7errrs"
 },
 "Male_character_skeletal_mesh_Plane_006": {
 "generate/lightmap_uv": 0,
@@ -82,7 +82,7 @@ _subresources={
 "lods/normal_merge_angle": 20.0,
 "save_to_file/enabled": true,
 "save_to_file/fallback_path": "res://Assets/Resources/Mesh/MaleCharacter/Body/Hands.res",
-"save_to_file/path": "uid://dbu2a2rs2brmj"
+"save_to_file/path": "uid://cb6kpgt8xywvx"
 },
 "Male_character_skeletal_mesh_Plane_014": {
 "generate/lightmap_uv": 0,
@@ -91,7 +91,7 @@ _subresources={
 "lods/normal_merge_angle": 20.0,
 "save_to_file/enabled": true,
 "save_to_file/fallback_path": "res://Assets/Resources/Mesh/MaleCharacter/Body/Face.res",
-"save_to_file/path": "uid://cidws06vviy8r"
+"save_to_file/path": "uid://dntxkhh1l5lkt"
 }
 }
 }

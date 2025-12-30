@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bdt8y7di0yt21" path="res://Scripts/UI/CharacterCreator.gd" id="1_ylvlj"]
 [ext_resource type="PackedScene" uid="uid://cfwyp1kljh03y" path="res://Scenes/Player/character_controller/player.tscn" id="2_65nj0"]
-[ext_resource type="Script" uid="uid://ctvjn0dcyxc1s" path="res://Scenes/UI/CameraGenderAdjuster.gd" id="2_s1hm4"]
+[ext_resource type="Script" uid="uid://ctvjn0dcyxc1s" path="res://Scenes/UI/CharacterCreatorCameraControler.gd" id="2_s1hm4"]
 
 [node name="CharacterCreation" type="Node3D" node_paths=PackedStringArray("btn_gender_male", "btn_gender_female", "btn_hair_next", "btn_hair_prev", "btn_start", "hair_colors_container", "eye_colors_container", "skin_colors_container", "camera_controller")]
 script = ExtResource("1_ylvlj")
@@ -17,11 +17,13 @@ skin_colors_container = NodePath("CanvasLayer/Control/Panel/VBoxContainer/SkinCo
 camera_controller = NodePath("Camera3D")
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(0.9987856, 0.007764127, -0.04865248, 1.1956731e-09, 0.9875048, 0.15758938, 0.049268097, -0.157398, 0.98630553, -0.83, 1.286, 2.655)
+transform = Transform3D(0.9987856, 0.007764127, -0.04865248, 1.1956731e-09, 0.9875048, 0.15758938, 0.049268097, -0.157398, 0.98630553, -0.19887584, 1.5478082, 0.7465837)
 fov = 38.5
 script = ExtResource("2_s1hm4")
 female_position = Vector3(-0.83, 1.286, 2.655)
 male_position = Vector3(-0.845, 1.336, 2.775)
+female_face_position = Vector3(-0.19887584, 1.5478082, 0.7465837)
+male_face_position = Vector3(-0.19887584, 1.6548038, 0.7465837)
 transition_time = 1.0
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]

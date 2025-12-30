@@ -1,6 +1,8 @@
 res://Scenes/Player/character_controller/player.tscn
 res://Assets/Resources/Materials/FemaleCharacter/Female_face_ShaderMaterial.tres
 res://Assets/Resources/Materials/FemaleCharacter/Female_body_ShaderMaterial.tres
+res://Assets/Resources/Materials/MaleCharacter/Male_face_ShaderMaterial.tres
+res://Assets/Resources/Materials/MaleCharacter/Male_body_ShaderMaterial.tres
 res://Player_inventory/item/items/Health Potions/Small_health_potion.tres
 res://Assets/Resources/Materials/FemaleArmor/Leather_set_of_the_north_ShaderMaterial.tres
 res://Player_inventory/item/items/Armor/Leather_set_of_the_north/Leather_headband_of_the_north.tres
@@ -11,17 +13,14 @@ res://Player_inventory/item/items/Armor/Leather_set_of_the_north/Leather_boots_o
 res://Player_inventory/item/items/Trinkets/Silver_ring.tres
 res://Player_inventory/item/items/Health Potions/Medium_health_potion.tres
 res://Player_inventory/Player_inv.tres
-res://Assets/Resources/Mesh/MaleCharacter/Body/Face.res
-res://Assets/Resources/Materials/MaleCharacter/Male_body_ShaderMaterial.tres
-res://Assets/Resources/Materials/MaleCharacter/Male_face_ShaderMaterial.tres
+res://Scenes/Player/Hair/hiar_male_1.tscn
+res://Assets/Resources/Materials/MaleCharacter/Hair/male_Hair1_blonde.tres
 res://Scripts/Player/controllers/player_mesh_controller.gd
+res://Scenes/Player/character_controller/hair_Rotation_aligner.gd
+res://Assets/Resources/Materials/MaleCharacter/Hair/male_Hair1_black.tres
+res://Assets/Resources/Materials/MaleCharacter/Hair/male_Hair1_brown.tres
+res://Assets/Resources/Materials/MaleCharacter/Hair/male_Hair1_orange.tres
+res://Assets/Resources/Materials/MaleCharacter/Hair/male_Hair1_white.tres
 res://Scenes/UI/CharacterCreation.tscn
-res://Scripts/UI/CharacterCreator.gd
-res://Scripts/Player/controllers/face_texture_change.gd
-res://Scripts/Player/controllers/animation_controller.gd
-res://Scenes/UI/CameraGenderAdjuster.gd
-res://Scenes/UI/PauseMenu.gd
-res://Scenes/world/test_world.tscn
-res://Scripts/main.gd
-res://Scenes/UI/PauseMenu.tscn
-res://Scenes/Player/character_controller/player_controller.tscn
+res://Scenes/UI/CharacterCreatorCameraControler.gd
+res://Scripts/Player/player_manager.gd

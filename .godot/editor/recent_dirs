@@ -1,7 +1,8 @@
-res://Scenes/UI
-res://Assets/Resources/Mesh/MaleCharacter/Body
-res://
+res://Scenes/Player/Hair
 res://Scenes/Player/character_controller
+res://Assets/Resources/Mesh/MaleCharacter/Body
+res://Scenes/UI
+res://
 res://Scripts/UI
 res://Assets/Resources/Mesh/FemaleCharacter/Armor_of_the_north_female
 res://Player_inventory/item/items/Health Potions
@@ -19,4 +20,3 @@ res://Assets/Resources/Mesh/FemaleCharacter
 res://Assets/Resources/Mesh
 res://Assets/Resources/Animations
 res://Assets/Resources/Materials/FemaleCharacter
-res://Assets/Resources/Materials

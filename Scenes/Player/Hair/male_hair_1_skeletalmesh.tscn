@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://bs0midip13dkd"]
+
+[ext_resource type="PackedScene" uid="uid://c66kcc81rdgv5" path="res://Assets/GLB_Files/Male_Hair1_skeletalmesh.glb" id="1_vg2fv"]
+[ext_resource type="Material" uid="uid://cv3fopo1b5gf" path="res://Assets/Resources/Materials/MaleCharacter/Hair/male_Hair1_blonde.tres" id="2_7wweb"]
+
+[node name="Male_Hair1_skeletalmesh" instance=ExtResource("1_vg2fv")]
+
+[node name="Hair_male_1" parent="." index="0"]
+surface_material_override/0 = ExtResource("2_7wweb")

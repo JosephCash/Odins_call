@@ -123,6 +123,7 @@ func set_gender(new_gender: String) -> void:
 	if new_gender != "female" and new_gender != "male": return
 	current_gender = new_gender
 	
+	# Przełączanie widoczności całych drzew postaci
 	if female_root: female_root.visible = (current_gender == "female")
 	if male_root:   male_root.visible   = (current_gender == "male")
 	
@@ -132,33 +133,27 @@ func set_gender(new_gender: String) -> void:
 	var full_skel_path = skeleton_path
 	if not full_skel_path.ends_with("/"): full_skel_path += "/"
 	
-	# 1. Aktualizacja referencji ekwipunku
+	# 1. Aktualizacja referencji ekwipunku na nowym szkielecie
 	feet_mesh  = active_root.get_node_or_null(full_skel_path + "FeetSlot/Feet")
 	legs_mesh  = active_root.get_node_or_null(full_skel_path + "LegsSlot/Legs")
 	torso_mesh = active_root.get_node_or_null(full_skel_path + "TorsoSlot/Torso")
 	hands_mesh = active_root.get_node_or_null(full_skel_path + "HandsSlot/Hands")
 	head_mesh  = active_root.get_node_or_null(full_skel_path + "HeadSlot/Head")
 	
-	# 2. Szukanie OSOBNEGO mesha twarzy (Face)
-	# Szukamy rekurencyjnie węzła, który ma w nazwie "Face" (wielkość liter nie ma znaczenia w contains jeśli nazwy są poprawne)
+	# 2. Szukanie mesha twarzy
 	face_mesh_ref = _find_mesh_recursive(active_root, "Face")
-	
-	# Debug: Sprawdź czy znaleziono
 	if not face_mesh_ref:
-		printerr("UWAGA: Nie znaleziono mesha o nazwie 'Face' u ", current_gender, "! Kolory oczu mogą nie działać.")
+		printerr("UWAGA: Nie znaleziono mesha o nazwie 'Face' u ", current_gender, "!")
 	
-	# 3. Włosy
+	# 3. Włosy - POPRAWKA
 	active_hair_attachment = active_root.get_node_or_null(hair_attachment_path)
 	hair_mesh = null
-	if active_hair_attachment and active_hair_attachment.get_child_count() > 0:
-		var current_hair_node = active_hair_attachment.get_child(0)
-		hair_mesh = _find_mesh_recursive(current_hair_node, "Hair")
-		if not hair_mesh:
-			hair_mesh = _find_mesh_recursive(current_hair_node, "")
-	else:
-		change_hair_model(current_hair_type)
+	
+	# ZAWSZE przeładowujemy włosy przy zmianie płci.
+	# To usuwa stare, potencjalnie nieaktualne fryzury i wstawia poprawną dla 'current_hair_type'.
+	change_hair_model(current_hair_type)
 		
-	# Odśwież skin na nowej twarzy
+	# Odśwież skin na nowej twarzy/ciele
 	refresh_all_skin_materials()
 
 func change_hair_model(type_index: int) -> void:
@@ -181,22 +176,37 @@ func change_hair_model(type_index: int) -> void:
 
 func update_hair_texture() -> void:
 	if not hair_mesh: return
-	var gender_prefix = "female" # Możesz zmienić na current_gender jeśli męskie włosy mają mieć inne tekstury
 	
-	var base_path = "res://Assets/Resources/textures/FemaleCharacter/Hair/"
-	var texture_name = "t_" + gender_prefix + "_hair" + str(current_hair_type) + "_" + current_hair_color + ".png"
+	var base_path = ""
+	var texture_name = ""
+
+	# Rozróżnienie ścieżek w zależności od płci
+	if current_gender == "female":
+		base_path = "res://Assets/Resources/textures/FemaleCharacter/Hair/"
+		# Wzorzec nazwy dla kobiet (zgodny z Twoim kodem): t_female_hair1_blonde.png
+		texture_name = "t_female_hair" + str(current_hair_type) + "_" + current_hair_color + ".png"
+	elif current_gender == "male":
+		base_path = "res://Assets/Resources/textures/MaleCharacter/Hair/"
+		# Wzorzec nazwy dla mężczyzn.
+		# UWAGA: Upewnij się, że pliki w folderze mają dokładnie taką strukturę nazw!
+		# Jeśli Twoje pliki nazywają się np. "Hair_male_1.png", musisz dostosować tę linię poniżej.
+		texture_name = "t_male_hair" + str(current_hair_type) + "_" + current_hair_color + ".png"
+
 	var full_path = base_path + texture_name
 	
 	if ResourceLoader.exists(full_path):
 		var new_texture = load(full_path)
 		var current_mat = hair_mesh.get_active_material(0) as StandardMaterial3D
 		if current_mat:
+			# Tworzenie kopii materiału, aby nie zmieniać oryginału (jeśli to zasób współdzielony)
 			if hair_mesh.get_surface_override_material(0) == null:
 				var mat_copy = current_mat.duplicate()
 				hair_mesh.set_surface_override_material(0, mat_copy)
 				mat_copy.albedo_texture = new_texture
 			else:
 				hair_mesh.get_surface_override_material(0).albedo_texture = new_texture
+	else:
+		printerr("Nie znaleziono tekstury włosów: ", full_path)
 
 # --- LOGIKA SKÓRY ---
 

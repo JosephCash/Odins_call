@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://1mdk2o8b0ps2"]
+
+[ext_resource type="PackedScene" uid="uid://dnanypulv80wo" path="res://Assets/GLB_Files/Male_Beard1.glb" id="1_d2ngd"]
+[ext_resource type="Material" uid="uid://tudqs82bv8c0" path="res://Assets/Resources/Materials/MaleCharacter/Beard/male_Beard1_blonde.tres" id="2_6h6l8"]
+
+[node name="Male_Beard1" instance=ExtResource("1_d2ngd")]
+
+[node name="Beard_male_1" parent="." index="0"]
+surface_material_override/0 = ExtResource("2_6h6l8")

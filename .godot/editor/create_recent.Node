@@ -1,8 +1,8 @@
+Node3D
 Button
 VBoxContainer
 ColorRect
 Control
-Node3D
 CollisionShape3D
 Area3D
 Jigglebone

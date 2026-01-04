@@ -4,13 +4,16 @@
 [ext_resource type="PackedScene" uid="uid://cfwyp1kljh03y" path="res://Scenes/Player/character_controller/player.tscn" id="2_65nj0"]
 [ext_resource type="Script" uid="uid://ctvjn0dcyxc1s" path="res://Scenes/UI/CharacterCreatorCameraControler.gd" id="2_s1hm4"]
 
-[node name="CharacterCreation" type="Node3D" node_paths=PackedStringArray("btn_gender_male", "btn_gender_female", "btn_hair_next", "btn_hair_prev", "btn_start", "hair_colors_container", "eye_colors_container", "skin_colors_container", "camera_controller")]
+[node name="CharacterCreation" type="Node3D" node_paths=PackedStringArray("btn_gender_male", "btn_gender_female", "btn_hair_next", "btn_hair_prev", "btn_beard_next", "btn_beard_prev", "label_beard_title", "btn_start", "hair_colors_container", "eye_colors_container", "skin_colors_container", "camera_controller")]
 script = ExtResource("1_ylvlj")
 btn_gender_male = NodePath("CanvasLayer/Control/Panel/VBoxContainer/SkinColorContainer2/BtnGenderMale")
 btn_gender_female = NodePath("CanvasLayer/Control/Panel/VBoxContainer/SkinColorContainer2/BtnGenderFemale")
 btn_hair_next = NodePath("CanvasLayer/Control/Panel/VBoxContainer/HairTypeContainer/BtnHairNext")
 btn_hair_prev = NodePath("CanvasLayer/Control/Panel/VBoxContainer/HairTypeContainer/BtnHairPrev")
-btn_start = NodePath("CanvasLayer/Control/Panel/VBoxContainer/BtnStart")
+btn_beard_next = NodePath("CanvasLayer/Control/Panel/VBoxContainer/HairTypeContainer2/BtnBeardNext")
+btn_beard_prev = NodePath("CanvasLayer/Control/Panel/VBoxContainer/HairTypeContainer2/BtnBeardPrev")
+label_beard_title = NodePath("CanvasLayer/Control/Panel/VBoxContainer/Label7")
+btn_start = NodePath("CanvasLayer/Control/Panel/BtnStart")
 hair_colors_container = NodePath("CanvasLayer/Control/Panel/VBoxContainer/HairColorContainer")
 eye_colors_container = NodePath("CanvasLayer/Control/Panel/VBoxContainer/EyeColorContainer")
 skin_colors_container = NodePath("CanvasLayer/Control/Panel/VBoxContainer/SkinColorContainer")
@@ -47,7 +50,7 @@ layout_mode = 0
 offset_left = 158.0
 offset_top = 211.0
 offset_right = 556.0
-offset_bottom = 599.0
+offset_bottom = 668.0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/Control/Panel"]
 layout_mode = 0
@@ -100,6 +103,24 @@ layout_mode = 2
 text = "<"
 
 [node name="BtnHairPrev" type="Button" parent="CanvasLayer/Control/Panel/VBoxContainer/HairTypeContainer"]
+layout_mode = 2
+text = ">
+"
+
+[node name="Label7" type="Label" parent="CanvasLayer/Control/Panel/VBoxContainer"]
+layout_mode = 2
+text = "Beard type"
+horizontal_alignment = 1
+
+[node name="HairTypeContainer2" type="HBoxContainer" parent="CanvasLayer/Control/Panel/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="BtnBeardNext" type="Button" parent="CanvasLayer/Control/Panel/VBoxContainer/HairTypeContainer2"]
+layout_mode = 2
+text = "<"
+
+[node name="BtnBeardPrev" type="Button" parent="CanvasLayer/Control/Panel/VBoxContainer/HairTypeContainer2"]
 layout_mode = 2
 text = ">
 "
@@ -192,6 +213,10 @@ text = "Male"
 layout_mode = 2
 horizontal_alignment = 1
 
-[node name="BtnStart" type="Button" parent="CanvasLayer/Control/Panel/VBoxContainer"]
-layout_mode = 2
+[node name="BtnStart" type="Button" parent="CanvasLayer/Control/Panel"]
+layout_mode = 0
+offset_left = 14.875
+offset_top = 409.46497
+offset_right = 389.875
+offset_bottom = 440.46497
 text = "Start"

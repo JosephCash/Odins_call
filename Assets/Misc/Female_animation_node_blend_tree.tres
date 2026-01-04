@@ -1,0 +1,59 @@
+[gd_resource type="AnimationNodeBlendTree" load_steps=12 format=3 uid="uid://bofvb3c2qcrc"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_yttnx"]
+animation = &"Female_Animlib/Female_Fall"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_he5ia"]
+animation = &"Female_Animlib/Female_Jump"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_ftaye"]
+animation = &"Female_Animlib/Female_Idle"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_5orwv"]
+animation = &"Female_Animlib/Female_Jog"
+
+[sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_kealx"]
+blend_point_0/node = SubResource("AnimationNodeAnimation_ftaye")
+blend_point_0/pos = 0.0
+blend_point_1/node = SubResource("AnimationNodeAnimation_5orwv")
+blend_point_1/pos = 1.0
+min_space = 0.0
+sync = true
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_4i036"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_65w5p"]
+xfade_time = 0.1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_28q66"]
+xfade_time = 0.3
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_vm6nb"]
+xfade_time = 0.2
+advance_mode = 2
+advance_condition = &"idle_jog"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_y2hd2"]
+xfade_time = 0.2
+advance_mode = 2
+advance_condition = &"fall"
+
+[sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_0h463"]
+states/Female_Animlib_Female_Fall/node = SubResource("AnimationNodeAnimation_yttnx")
+states/Female_Animlib_Female_Fall/position = Vector2(484, -84)
+states/Female_Animlib_Female_Jump/node = SubResource("AnimationNodeAnimation_he5ia")
+states/Female_Animlib_Female_Jump/position = Vector2(180, 7)
+states/Idle_to_jog_Female/node = SubResource("AnimationNodeBlendSpace1D_kealx")
+states/Idle_to_jog_Female/position = Vector2(484, 141)
+states/Start/position = Vector2(188, 141)
+transitions = ["Start", "Idle_to_jog_Female", SubResource("AnimationNodeStateMachineTransition_4i036"), "Idle_to_jog_Female", "Female_Animlib_Female_Jump", SubResource("AnimationNodeStateMachineTransition_65w5p"), "Female_Animlib_Female_Jump", "Female_Animlib_Female_Fall", SubResource("AnimationNodeStateMachineTransition_28q66"), "Female_Animlib_Female_Fall", "Idle_to_jog_Female", SubResource("AnimationNodeStateMachineTransition_vm6nb"), "Idle_to_jog_Female", "Female_Animlib_Female_Fall", SubResource("AnimationNodeStateMachineTransition_y2hd2")]
+graph_offset = Vector2(-196, -143)
+
+[resource]
+graph_offset = Vector2(-826.4851, 119.24222)
+nodes/FemaleLocomotion/node = SubResource("AnimationNodeStateMachine_0h463")
+nodes/FemaleLocomotion/position = Vector2(-320, 160)
+node_connections = [&"output", 0, &"FemaleLocomotion"]

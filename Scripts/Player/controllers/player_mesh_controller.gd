@@ -15,11 +15,16 @@ var feet_mesh: MeshInstance3D
 var legs_mesh: MeshInstance3D
 var torso_mesh: MeshInstance3D
 var hands_mesh: MeshInstance3D
-var head_mesh: MeshInstance3D       # Mesh głowy (do ubierania hełmów)
-var face_mesh_ref: MeshInstance3D   # OSOBNY Mesh twarzy (do kolorów oczu/brwi)
+var head_mesh: MeshInstance3D       
+var face_mesh_ref: MeshInstance3D   
 var hair_mesh: MeshInstance3D 
+var beard_mesh: MeshInstance3D      
 
 var active_hair_attachment: Node3D 
+
+# Te zmienne trzymają referencje, ale dla pewności będziemy też czyścić po dzieciach węzła
+var active_hair_node: Node         
+var active_beard_node: Node         
 
 # --- DANE DOMYŚLNE ---
 var default_data = {
@@ -27,12 +32,14 @@ var default_data = {
 	"male":   {"feet": {}, "legs": {}, "torso": {}, "hands": {}, "head": {}},
 }
 
-# --- LISTY FRYZUR ---
+# --- LISTY FRYZUR I BRÓD ---
 @export var hair_scenes: Array[PackedScene]      # Damskie
 @export var male_hair_scenes: Array[PackedScene] # Męskie
+@export var male_beard_scenes: Array[PackedScene] # Męskie brody 
 
 # --- DANE KOSMETYCZNE ---
 var current_hair_type: int = 1 
+var current_beard_type: int = 1     
 var current_hair_color: String = "blonde"
 var current_skin_id: String = "Default"
 
@@ -90,6 +97,12 @@ func _initialize_references(gender_key: String, root_node: Node3D) -> void:
 	if f_torso: default_data[gender_key]["torso"] = {"mesh": f_torso.mesh, "mat": f_torso.get_active_material(0)}
 	if f_hands: default_data[gender_key]["hands"] = {"mesh": f_hands.mesh, "mat": f_hands.get_active_material(0)}
 	if f_head: default_data[gender_key]["head"] = {"mesh": f_head.mesh, "mat": f_head.get_active_material(0)}
+	
+	# POPRAWKA: Wyczyść wszelkie "śmieciowe" fryzury z edytora przy starcie
+	var attachment = root_node.get_node_or_null(hair_attachment_path)
+	if attachment:
+		for child in attachment.get_children():
+			child.queue_free()
 
 
 func apply_appearance(data: Dictionary) -> void:
@@ -102,13 +115,21 @@ func apply_appearance(data: Dictionary) -> void:
 
 	if data.has("hair_type"):
 		var new_type = int(data["hair_type"])
-		if new_type != current_hair_type or hair_mesh == null:
+		# Zawsze wymuszamy zmianę jeśli nie mamy mesha (np. po zmianie płci)
+		if new_type != current_hair_type or hair_mesh == null or active_hair_node == null:
 			current_hair_type = new_type
 			change_hair_model(current_hair_type)
 	
+	if data.has("beard_type"):
+		var new_beard = int(data["beard_type"])
+		if new_beard != current_beard_type or beard_mesh == null:
+			current_beard_type = new_beard
+			change_beard_model(current_beard_type)
+
 	if data.has("hair_color_id"):
 		current_hair_color = data["hair_color_id"]
 		if hair_mesh: update_hair_texture()
+		if beard_mesh: update_beard_texture()
 		update_eyebrow_color(current_hair_color)
 		
 	if data.has("eye_color_id"):
@@ -121,9 +142,10 @@ func apply_appearance(data: Dictionary) -> void:
 
 func set_gender(new_gender: String) -> void:
 	if new_gender != "female" and new_gender != "male": return
+	
+	var gender_changed = (current_gender != new_gender)
 	current_gender = new_gender
 	
-	# Przełączanie widoczności całych drzew postaci
 	if female_root: female_root.visible = (current_gender == "female")
 	if male_root:   male_root.visible   = (current_gender == "male")
 	
@@ -133,35 +155,59 @@ func set_gender(new_gender: String) -> void:
 	var full_skel_path = skeleton_path
 	if not full_skel_path.ends_with("/"): full_skel_path += "/"
 	
-	# 1. Aktualizacja referencji ekwipunku na nowym szkielecie
 	feet_mesh  = active_root.get_node_or_null(full_skel_path + "FeetSlot/Feet")
 	legs_mesh  = active_root.get_node_or_null(full_skel_path + "LegsSlot/Legs")
 	torso_mesh = active_root.get_node_or_null(full_skel_path + "TorsoSlot/Torso")
 	hands_mesh = active_root.get_node_or_null(full_skel_path + "HandsSlot/Hands")
 	head_mesh  = active_root.get_node_or_null(full_skel_path + "HeadSlot/Head")
 	
-	# 2. Szukanie mesha twarzy
 	face_mesh_ref = _find_mesh_recursive(active_root, "Face")
-	if not face_mesh_ref:
-		printerr("UWAGA: Nie znaleziono mesha o nazwie 'Face' u ", current_gender, "!")
 	
-	# 3. Włosy - POPRAWKA
+	# Ustawiamy attachment point dla nowej płci
 	active_hair_attachment = active_root.get_node_or_null(hair_attachment_path)
-	hair_mesh = null
 	
-	# ZAWSZE przeładowujemy włosy przy zmianie płci.
-	# To usuwa stare, potencjalnie nieaktualne fryzury i wstawia poprawną dla 'current_hair_type'.
-	change_hair_model(current_hair_type)
+	# Resetujemy referencje do obiektów, bo zmieniło się całe drzewo
+	hair_mesh = null
+	active_hair_node = null
+	beard_mesh = null
+	active_beard_node = null
+	
+	# Zabezpieczenie limitów przy zmianie płci
+	if gender_changed:
+		var max_hair = get_hair_count()
+		if current_hair_type > max_hair: current_hair_type = 1
 		
-	# Odśwież skin na nowej twarzy/ciele
+		var max_beard = get_beard_count()
+		if current_beard_type > max_beard: current_beard_type = 1
+
+	change_hair_model(current_hair_type)
+	change_beard_model(current_beard_type)
 	refresh_all_skin_materials()
+
+# --- POMOCNICZE FUNKCJE DLA UI ---
+func get_hair_count() -> int:
+	if current_gender == "female":
+		return hair_scenes.size() if hair_scenes else 0
+	else:
+		return male_hair_scenes.size() if male_hair_scenes else 0
+
+func get_beard_count() -> int:
+	if current_gender == "female":
+		return 0
+	else:
+		return male_beard_scenes.size() if male_beard_scenes else 0
 
 func change_hair_model(type_index: int) -> void:
 	if not active_hair_attachment: return
 	
+	# POPRAWKA: Pętla czyszcząca wszystkie stare fryzury
+	# Usuwamy wszystko co NIE JEST obecną brodą
 	for child in active_hair_attachment.get_children():
-		child.queue_free()
+		if child == active_beard_node and is_instance_valid(active_beard_node):
+			continue # To jest broda, zostawiamy
+		child.queue_free() # To jest stara fryzura lub śmieć, usuwamy
 	
+	# Teraz tworzymy nową fryzurę
 	var scenes_list = hair_scenes if current_gender == "female" else male_hair_scenes
 	var array_index = type_index - 1
 	
@@ -170,9 +216,39 @@ func change_hair_model(type_index: int) -> void:
 		if scene_to_spawn:
 			var new_hair_node = scene_to_spawn.instantiate()
 			active_hair_attachment.add_child(new_hair_node)
+			
+			active_hair_node = new_hair_node # Aktualizujemy referencję
+			
 			hair_mesh = _find_mesh_recursive(new_hair_node, "Hair")
 			if not hair_mesh: hair_mesh = _find_mesh_recursive(new_hair_node, "")
 			update_hair_texture()
+
+func change_beard_model(type_index: int) -> void:
+	if not active_hair_attachment: return
+	
+	# POPRAWKA: Pętla czyszcząca stare brody
+	# Usuwamy wszystko co NIE JEST obecnymi włosami
+	for child in active_hair_attachment.get_children():
+		if child == active_hair_node and is_instance_valid(active_hair_node):
+			continue # To są włosy, zostawiamy
+		child.queue_free() # To stara broda lub śmieć, usuwamy
+	
+	if current_gender == "female": return
+	
+	var array_index = type_index - 1
+	
+	if male_beard_scenes != null and array_index >= 0 and array_index < male_beard_scenes.size():
+		var scene_to_spawn = male_beard_scenes[array_index]
+		if scene_to_spawn:
+			var new_beard_node = scene_to_spawn.instantiate()
+			active_hair_attachment.add_child(new_beard_node)
+			
+			active_beard_node = new_beard_node # Aktualizujemy referencję
+			
+			beard_mesh = _find_mesh_recursive(new_beard_node, "Beard")
+			if not beard_mesh: beard_mesh = _find_mesh_recursive(new_beard_node, "")
+			
+			update_beard_texture()
 
 func update_hair_texture() -> void:
 	if not hair_mesh: return
@@ -180,16 +256,11 @@ func update_hair_texture() -> void:
 	var base_path = ""
 	var texture_name = ""
 
-	# Rozróżnienie ścieżek w zależności od płci
 	if current_gender == "female":
 		base_path = "res://Assets/Resources/textures/FemaleCharacter/Hair/"
-		# Wzorzec nazwy dla kobiet (zgodny z Twoim kodem): t_female_hair1_blonde.png
 		texture_name = "t_female_hair" + str(current_hair_type) + "_" + current_hair_color + ".png"
 	elif current_gender == "male":
 		base_path = "res://Assets/Resources/textures/MaleCharacter/Hair/"
-		# Wzorzec nazwy dla mężczyzn.
-		# UWAGA: Upewnij się, że pliki w folderze mają dokładnie taką strukturę nazw!
-		# Jeśli Twoje pliki nazywają się np. "Hair_male_1.png", musisz dostosować tę linię poniżej.
 		texture_name = "t_male_hair" + str(current_hair_type) + "_" + current_hair_color + ".png"
 
 	var full_path = base_path + texture_name
@@ -198,15 +269,30 @@ func update_hair_texture() -> void:
 		var new_texture = load(full_path)
 		var current_mat = hair_mesh.get_active_material(0) as StandardMaterial3D
 		if current_mat:
-			# Tworzenie kopii materiału, aby nie zmieniać oryginału (jeśli to zasób współdzielony)
 			if hair_mesh.get_surface_override_material(0) == null:
 				var mat_copy = current_mat.duplicate()
 				hair_mesh.set_surface_override_material(0, mat_copy)
 				mat_copy.albedo_texture = new_texture
 			else:
 				hair_mesh.get_surface_override_material(0).albedo_texture = new_texture
-	else:
-		printerr("Nie znaleziono tekstury włosów: ", full_path)
+
+func update_beard_texture() -> void:
+	if not beard_mesh: return
+	
+	var base_path = "res://Assets/Resources/textures/MaleCharacter/Beard/"
+	var texture_name = "t_male_beard" + str(current_beard_type) + "_" + current_hair_color + ".png"
+	var full_path = base_path + texture_name
+	
+	if ResourceLoader.exists(full_path):
+		var new_texture = load(full_path)
+		var current_mat = beard_mesh.get_active_material(0) as StandardMaterial3D
+		if current_mat:
+			if beard_mesh.get_surface_override_material(0) == null:
+				var mat_copy = current_mat.duplicate()
+				beard_mesh.set_surface_override_material(0, mat_copy)
+				mat_copy.albedo_texture = new_texture
+			else:
+				beard_mesh.get_surface_override_material(0).albedo_texture = new_texture
 
 # --- LOGIKA SKÓRY ---
 
@@ -220,43 +306,33 @@ func refresh_all_skin_materials() -> void:
 	if hands_mesh: _inject_colors_to_mesh(hands_mesh, colors)
 	if feet_mesh: _inject_colors_to_mesh(feet_mesh, colors)
 	
-	# Ważne: Twarz też musi dostać kolor skóry (oraz usta)
 	if face_mesh_ref: _inject_colors_to_mesh(face_mesh_ref, colors)
 
 func _inject_colors_to_mesh(mesh_instance: MeshInstance3D, colors: Dictionary) -> void:
-	# Pobieramy get_active_material, który uwzględnia override (stworzony np. przez skrypt mrugania)
 	var check_count = 1
 	if mesh_instance.mesh: check_count = mesh_instance.mesh.get_surface_count()
-	# Sprawdź też override, jeśli istnieje
 	if mesh_instance.get_surface_override_material_count() > 0:
 		check_count = max(check_count, mesh_instance.get_surface_override_material_count())
 
 	for i in range(check_count):
 		var mat = mesh_instance.get_active_material(i)
-		
 		if mat is ShaderMaterial:
 			mat.set_shader_parameter("skin_light", colors["light"])
 			mat.set_shader_parameter("skin_mid",   colors["mid"])
 			mat.set_shader_parameter("skin_dark",  colors["dark"])
-			
-			# Parametr "lips" ustawiamy TYLKO dla twarzy (face_mesh_ref)
 			if mesh_instance == face_mesh_ref:
 				mat.set_shader_parameter("lip_darkness", colors.get("lips", 0.0))
 
-# --- LOGIKA TWARZY (OCZY I BRWI) ---
+# --- LOGIKA TWARZY ---
 
 func update_eyebrow_color(color_id: String) -> void:
-	# Celujemy tylko w FACE MESH
 	if not face_mesh_ref: return
-	
 	var mat = face_mesh_ref.get_active_material(0)
 	if mat is ShaderMaterial and eyebrow_palette.has(color_id):
 		mat.set_shader_parameter("new_eyebrow_color", eyebrow_palette[color_id])
 
 func update_eye_color(color_id: String) -> void:
-	# Celujemy tylko w FACE MESH
 	if not face_mesh_ref: return
-	
 	var mat = face_mesh_ref.get_active_material(0)
 	if mat is ShaderMaterial and eye_palette.has(color_id):
 		var val = eye_palette[color_id]

@@ -1,4 +1,6 @@
 res://Scenes/Player/Hair
+res://Assets/Misc
+res://Assets/Resources/Animations
 res://Scenes/Player/character_controller
 res://Assets/Resources/Mesh/MaleCharacter/Body
 res://Scenes/UI
@@ -18,5 +20,3 @@ res://Player_inventory
 res://Player_inventory/item
 res://Assets/Resources/Mesh/FemaleCharacter
 res://Assets/Resources/Mesh
-res://Assets/Resources/Animations
-res://Assets/Resources/Materials/FemaleCharacter

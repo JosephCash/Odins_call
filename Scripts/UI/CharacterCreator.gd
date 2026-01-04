@@ -4,8 +4,6 @@ extends Node3D
 @onready var player_preview = $PlayerPreview
 
 # --- USTAWIENIA UI ---
-# Grupy zmiennych eksportowanych do przypisania przycisków i kontenerów w edytorze
-
 @export_group("Gender Selection")
 @export var btn_gender_male: Button
 @export var btn_gender_female: Button
@@ -13,6 +11,13 @@ extends Node3D
 @export_group("Navigation Buttons")
 @export var btn_hair_next: Button
 @export var btn_hair_prev: Button
+
+@export var btn_beard_next: Button
+@export var btn_beard_prev: Button
+
+# NOWE: Zmienna do przypisania Label7 (napis "Beard Type")
+@export var label_beard_title: Label 
+
 @export var btn_start: Button
 
 @export_group("Color Containers")
@@ -21,39 +26,38 @@ extends Node3D
 @export var skin_colors_container: Control
 
 # --- USTAWIENIA OBRACANIA ---
-# Parametry sterujące czułością i stanem obracania modelu myszką
 @export var rotation_sensitivity: float = 0.005
 var is_dragging: bool = false 
 
 # --- USTAWIENIA OFFSETU KAMERY ---
 @export_group("Scene References")
-@export var camera_controller: Camera3D # Tu przypniemy naszą kamerę ze skryptem
+@export var camera_controller: Camera3D 
 
 # --- DOMYŚLNE DANE ---
-# Słownik przechowujący aktualny stan wyboru wyglądu postaci
 var current_settings = {
 	"gender": "female",
 	"hair_color_id": "blonde",
 	"hair_type": 1,
+	"beard_type": 1,
 	"eye_color_id": "blue",
 	"skin_id": "Default"
 }
 
 func _ready():
-	# Ustawia widoczność kursora i podpina stałe przyciski interfejsu
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	await get_tree().process_frame
 	
-	# Podpięcie przycisków płci
 	if btn_gender_male:   btn_gender_male.pressed.connect(func(): _on_gender_selected("male"))
 	if btn_gender_female: btn_gender_female.pressed.connect(func(): _on_gender_selected("female"))
 	
-	# Podpięcie przycisków nawigacji
 	if btn_hair_next: btn_hair_next.pressed.connect(_on_hair_next_pressed)
 	if btn_hair_prev: btn_hair_prev.pressed.connect(_on_hair_prev_pressed)
+	
+	if btn_beard_next: btn_beard_next.pressed.connect(_on_beard_next_pressed)
+	if btn_beard_prev: btn_beard_prev.pressed.connect(_on_beard_prev_pressed)
+	
 	if btn_start:     btn_start.pressed.connect(_on_start_game_pressed)
 	
-	# Dynamicznie podpina sygnały do przycisków kolorów włosów na podstawie ich nazw
 	if hair_colors_container:
 		for child in hair_colors_container.get_children():
 			if child is Button and child.name.begins_with("Btn") and not "Eye" in child.name and not "Skin" in child.name:
@@ -61,36 +65,36 @@ func _ready():
 				if "hair" in color_name or "start" in color_name: continue
 				child.pressed.connect(func(): _on_hair_color_selected(color_name))
 
-	# Dynamicznie podpina sygnały do przycisków kolorów oczu
 	if eye_colors_container:
 		for child in eye_colors_container.get_children():
 			if child is Button and child.name.begins_with("BtnEye"):
 				var eye_color = child.name.replace("BtnEye", "").to_lower()
 				child.pressed.connect(func(): _on_eye_color_selected(eye_color))
 
-	# Dynamicznie podpina sygnały do przycisków kolorów skóry
 	if skin_colors_container:
 		for child in skin_colors_container.get_children():
 			if child is Button and child.name.begins_with("BtnSkin"):
 				var skin_id = child.name.replace("BtnSkin", "")
 				child.pressed.connect(func(): _on_skin_color_selected(skin_id))
-	else:
-		printerr("UWAGA: Nie przypisano skin_colors_container!")
 
-	# Inicjalne odświeżenie wyglądu
 	_update_preview()
+	_update_beard_ui_visibility()
 
 # --- FUNKCJE WYBORU ---
 
-# Nowa funkcja: zmiana płci
 func _on_gender_selected(gender_id: String):
+	if current_settings["gender"] != gender_id:
+		current_settings["hair_type"] = 1
+		# Przy zmianie płci resetujemy też brodę
+		current_settings["beard_type"] = 1 
+
 	current_settings["gender"] = gender_id
 	_update_preview()
+	_update_beard_ui_visibility()
 	
 	if camera_controller and camera_controller.has_method("move_to_gender"):
 			camera_controller.move_to_gender(gender_id)
 
-# Aktualizuje wybrany kolor (włosy/oczy/skóra) w słowniku i odświeża podgląd
 func _on_hair_color_selected(color_id: String):
 	current_settings["hair_color_id"] = color_id
 	_update_preview()
@@ -104,33 +108,69 @@ func _on_skin_color_selected(skin_id: String):
 	_update_preview()
 
 # --- FRYZURA ---
-# Zmienia typ fryzury (cyklicznie w górę lub w dół) i odświeża podgląd
 func _on_hair_next_pressed():
 	current_settings["hair_type"] += 1
-	if current_settings["hair_type"] > 2: 
+	var limit = _get_hair_limit_from_controller()
+	if current_settings["hair_type"] > limit: 
 		current_settings["hair_type"] = 1
 	_update_preview()
 
 func _on_hair_prev_pressed():
 	current_settings["hair_type"] -= 1
+	var limit = _get_hair_limit_from_controller()
 	if current_settings["hair_type"] < 1:
-		current_settings["hair_type"] = 2
+		current_settings["hair_type"] = limit
 	_update_preview()
 
+# --- BRODA ---
+func _on_beard_next_pressed():
+	current_settings["beard_type"] += 1
+	var limit = _get_beard_limit_from_controller()
+	if current_settings["beard_type"] > limit: 
+		current_settings["beard_type"] = 1
+	_update_preview()
+
+func _on_beard_prev_pressed():
+	current_settings["beard_type"] -= 1
+	var limit = _get_beard_limit_from_controller()
+	if current_settings["beard_type"] < 1:
+		current_settings["beard_type"] = limit
+	_update_preview()
+
+func _update_beard_ui_visibility():
+	var is_male = (current_settings["gender"] == "male")
+	
+	# Ukrywamy/pokazujemy przyciski
+	if btn_beard_next: btn_beard_next.visible = is_male
+	if btn_beard_prev: btn_beard_prev.visible = is_male
+	
+	# NOWE: Ukrywamy/pokazujemy napis (Label7)
+	if label_beard_title: label_beard_title.visible = is_male
+
+# --- POMOCNICZE ---
+func _get_hair_limit_from_controller() -> int:
+	var controller = _find_mesh_controller(player_preview)
+	if controller and controller.has_method("get_hair_count"):
+		return controller.get_hair_count()
+	return 1
+
+func _get_beard_limit_from_controller() -> int:
+	var controller = _find_mesh_controller(player_preview)
+	if controller and controller.has_method("get_beard_count"):
+		return controller.get_beard_count()
+	return 1
+
 # --- START ---
-# Przekazuje wybrane dane do globalnego menedżera gracza i zmienia scenę na świat gry
 func _on_start_game_pressed():
 	PlayerManager.set_appearance_data(current_settings)
 	get_tree().change_scene_to_file("res://Scenes/world/test_world.tscn")
 
 # --- AKTUALIZACJA ---
-# Znajduje skrypt kontrolujący siatkę modelu i aplikuje aktualne ustawienia wyglądu
 func _update_preview():
 	var mesh_controller = _find_mesh_controller(player_preview)
 	if mesh_controller:
 		mesh_controller.apply_appearance(current_settings)
 
-# Rekurencyjnie przeszukuje dzieci węzła w poszukiwaniu metody 'apply_appearance'
 func _find_mesh_controller(node: Node) -> Node:
 	if node.has_method("apply_appearance"): return node
 	for child in node.get_children():
@@ -138,7 +178,6 @@ func _find_mesh_controller(node: Node) -> Node:
 		if res: return res
 	return null
 
-# Obsługuje obracanie modelu postaci poprzez przeciąganie myszką z wciśniętym lewym przyciskiem
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		is_dragging = event.pressed

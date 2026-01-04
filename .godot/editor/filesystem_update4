@@ -25,3 +25,5 @@ res://Scenes/Player/character_controller/player.tscn
 res://Scenes/UI/CharacterCreation.tscn
 res://Scripts/UI/CharacterCreator.gd
 res://Scripts/Player/player_manager.gd
+res://Assets/Resources/Materials/MaleCharacter/Body/Male_body_ShaderMaterial.tres
+res://Assets/Resources/Materials/FemaleCharacter/Body/Female_body_ShaderMaterial.tres

@@ -1,6 +1,5 @@
 extends Node3D
 
-# Referencja do modelu postaci wyświetlanego w podglądzie
 @onready var player_preview = $PlayerPreview
 
 # --- USTAWIENIA UI ---
@@ -11,12 +10,13 @@ extends Node3D
 @export_group("Navigation Buttons")
 @export var btn_hair_next: Button
 @export var btn_hair_prev: Button
-
 @export var btn_beard_next: Button
 @export var btn_beard_prev: Button
+@export var btn_tattoo_next: Button
+@export var btn_tattoo_prev: Button
 
-# NOWE: Zmienna do przypisania Label7 (napis "Beard Type")
 @export var label_beard_title: Label 
+@export var label_tattoo_title: Label 
 
 @export var btn_start: Button
 
@@ -24,12 +24,14 @@ extends Node3D
 @export var hair_colors_container: Control 
 @export var eye_colors_container: Control 
 @export var skin_colors_container: Control
+# NOWE: Kontener na kolory tatuaży
+@export var tattoo_colors_container: Control
 
 # --- USTAWIENIA OBRACANIA ---
 @export var rotation_sensitivity: float = 0.005
 var is_dragging: bool = false 
 
-# --- USTAWIENIA OFFSETU KAMERY ---
+# --- KAMERA ---
 @export_group("Scene References")
 @export var camera_controller: Camera3D 
 
@@ -39,6 +41,8 @@ var current_settings = {
 	"hair_color_id": "blonde",
 	"hair_type": 1,
 	"beard_type": 1,
+	"tattoo_index": 0,
+	"tattoo_color_id": "black", # NOWE
 	"eye_color_id": "blue",
 	"skin_id": "Default"
 }
@@ -55,6 +59,9 @@ func _ready():
 	
 	if btn_beard_next: btn_beard_next.pressed.connect(_on_beard_next_pressed)
 	if btn_beard_prev: btn_beard_prev.pressed.connect(_on_beard_prev_pressed)
+	
+	if btn_tattoo_next: btn_tattoo_next.pressed.connect(_on_tattoo_next_pressed)
+	if btn_tattoo_prev: btn_tattoo_prev.pressed.connect(_on_tattoo_prev_pressed)
 	
 	if btn_start:     btn_start.pressed.connect(_on_start_game_pressed)
 	
@@ -77,6 +84,14 @@ func _ready():
 				var skin_id = child.name.replace("BtnSkin", "")
 				child.pressed.connect(func(): _on_skin_color_selected(skin_id))
 
+	# NOWE: Obsługa przycisków kolorów tatuażu
+	if tattoo_colors_container:
+		for child in tattoo_colors_container.get_children():
+			# Nazwy przycisków: BtnTattooBlack, BtnTattooViking, BtnTattooRed
+			if child is Button and child.name.begins_with("BtnTattoo"):
+				var tattoo_color_id = child.name.replace("BtnTattoo", "").to_lower()
+				child.pressed.connect(func(): _on_tattoo_color_selected(tattoo_color_id))
+
 	_update_preview()
 	_update_beard_ui_visibility()
 
@@ -85,13 +100,10 @@ func _ready():
 func _on_gender_selected(gender_id: String):
 	if current_settings["gender"] != gender_id:
 		current_settings["hair_type"] = 1
-		# Przy zmianie płci resetujemy też brodę
 		current_settings["beard_type"] = 1 
-
 	current_settings["gender"] = gender_id
 	_update_preview()
 	_update_beard_ui_visibility()
-	
 	if camera_controller and camera_controller.has_method("move_to_gender"):
 			camera_controller.move_to_gender(gender_id)
 
@@ -107,58 +119,69 @@ func _on_skin_color_selected(skin_id: String):
 	current_settings["skin_id"] = skin_id
 	_update_preview()
 
+# NOWE: Wybór koloru tatuażu
+func _on_tattoo_color_selected(color_id: String):
+	current_settings["tattoo_color_id"] = color_id
+	_update_preview()
+
 # --- FRYZURA ---
 func _on_hair_next_pressed():
 	current_settings["hair_type"] += 1
 	var limit = _get_hair_limit_from_controller()
-	if current_settings["hair_type"] > limit: 
-		current_settings["hair_type"] = 1
+	if current_settings["hair_type"] > limit: current_settings["hair_type"] = 1
 	_update_preview()
 
 func _on_hair_prev_pressed():
 	current_settings["hair_type"] -= 1
 	var limit = _get_hair_limit_from_controller()
-	if current_settings["hair_type"] < 1:
-		current_settings["hair_type"] = limit
+	if current_settings["hair_type"] < 1: current_settings["hair_type"] = limit
 	_update_preview()
 
 # --- BRODA ---
 func _on_beard_next_pressed():
 	current_settings["beard_type"] += 1
 	var limit = _get_beard_limit_from_controller()
-	if current_settings["beard_type"] > limit: 
-		current_settings["beard_type"] = 1
+	if current_settings["beard_type"] > limit: current_settings["beard_type"] = 1
 	_update_preview()
 
 func _on_beard_prev_pressed():
 	current_settings["beard_type"] -= 1
 	var limit = _get_beard_limit_from_controller()
-	if current_settings["beard_type"] < 1:
-		current_settings["beard_type"] = limit
+	if current_settings["beard_type"] < 1: current_settings["beard_type"] = limit
 	_update_preview()
 
 func _update_beard_ui_visibility():
 	var is_male = (current_settings["gender"] == "male")
-	
-	# Ukrywamy/pokazujemy przyciski
 	if btn_beard_next: btn_beard_next.visible = is_male
 	if btn_beard_prev: btn_beard_prev.visible = is_male
-	
-	# NOWE: Ukrywamy/pokazujemy napis (Label7)
 	if label_beard_title: label_beard_title.visible = is_male
 
-# --- POMOCNICZE ---
+# --- TATUAŻE ---
+func _on_tattoo_next_pressed():
+	current_settings["tattoo_index"] += 1
+	var limit = _get_tattoo_limit_from_controller()
+	if current_settings["tattoo_index"] > limit: current_settings["tattoo_index"] = 0
+	_update_preview()
+
+func _on_tattoo_prev_pressed():
+	current_settings["tattoo_index"] -= 1
+	var limit = _get_tattoo_limit_from_controller()
+	if current_settings["tattoo_index"] < 0: current_settings["tattoo_index"] = limit
+	_update_preview()
+
+# --- LIMITS ---
 func _get_hair_limit_from_controller() -> int:
 	var controller = _find_mesh_controller(player_preview)
-	if controller and controller.has_method("get_hair_count"):
-		return controller.get_hair_count()
+	if controller and controller.has_method("get_hair_count"): return controller.get_hair_count()
 	return 1
-
 func _get_beard_limit_from_controller() -> int:
 	var controller = _find_mesh_controller(player_preview)
-	if controller and controller.has_method("get_beard_count"):
-		return controller.get_beard_count()
+	if controller and controller.has_method("get_beard_count"): return controller.get_beard_count()
 	return 1
+func _get_tattoo_limit_from_controller() -> int:
+	var controller = _find_mesh_controller(player_preview)
+	if controller and controller.has_method("get_tattoo_count"): return controller.get_tattoo_count()
+	return 0
 
 # --- START ---
 func _on_start_game_pressed():

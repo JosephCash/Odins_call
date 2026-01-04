@@ -21,8 +21,6 @@ var hair_mesh: MeshInstance3D
 var beard_mesh: MeshInstance3D      
 
 var active_hair_attachment: Node3D 
-
-# Te zmienne trzymają referencje, ale dla pewności będziemy też czyścić po dzieciach węzła
 var active_hair_node: Node         
 var active_beard_node: Node         
 
@@ -33,15 +31,29 @@ var default_data = {
 }
 
 # --- LISTY FRYZUR I BRÓD ---
-@export var hair_scenes: Array[PackedScene]      # Damskie
-@export var male_hair_scenes: Array[PackedScene] # Męskie
-@export var male_beard_scenes: Array[PackedScene] # Męskie brody 
+@export var hair_scenes: Array[PackedScene]      
+@export var male_hair_scenes: Array[PackedScene] 
+@export var male_beard_scenes: Array[PackedScene] 
 
 # --- DANE KOSMETYCZNE ---
 var current_hair_type: int = 1 
 var current_beard_type: int = 1     
 var current_hair_color: String = "blonde"
 var current_skin_id: String = "Default"
+
+# --- DANE TATUAŻY ---
+var current_tattoo_index: int = 0
+var current_tattoo_color_id: String = "black" # Domyślny kolor
+
+var tattoo_count_male: int = 0
+var tattoo_count_female: int = 0
+
+# PALETA KOLORÓW TATUAŻY
+var tattoo_palette = {
+	"black":  Color(0.15, 0.15, 0.15),       # Zwykły czarny (lekko szary by nie był smołą)
+	"viking": Color(0.18, 0.35, 0.45),       # Niebieskawy / Wikingowy
+	"red":    Color(0.45, 0.1, 0.1)          # Ciemny czerwony
+}
 
 var skin_presets = {
 	"Default":   {"light": Color("eba697"), "mid": Color("de9a8f"), "dark": Color("be7e71"), "lips": 0.0},
@@ -71,6 +83,9 @@ var eye_palette = {
 
 
 func _ready() -> void:
+	tattoo_count_male = _count_existing_tattoos("res://Assets/Resources/textures/MaleCharacter/Tattoos/", "t_male_tattoo_")
+	tattoo_count_female = _count_existing_tattoos("res://Assets/Resources/textures/FemaleCharacter/Tattoos/", "t_female_tattoo_")
+	
 	await get_tree().process_frame
 	
 	_initialize_references("female", female_root)
@@ -82,7 +97,6 @@ func _ready() -> void:
 
 func _initialize_references(gender_key: String, root_node: Node3D) -> void:
 	if not root_node: return
-		
 	var full_skel_path = skeleton_path
 	if not full_skel_path.ends_with("/"): full_skel_path += "/"
 	
@@ -98,7 +112,6 @@ func _initialize_references(gender_key: String, root_node: Node3D) -> void:
 	if f_hands: default_data[gender_key]["hands"] = {"mesh": f_hands.mesh, "mat": f_hands.get_active_material(0)}
 	if f_head: default_data[gender_key]["head"] = {"mesh": f_head.mesh, "mat": f_head.get_active_material(0)}
 	
-	# POPRAWKA: Wyczyść wszelkie "śmieciowe" fryzury z edytora przy starcie
 	var attachment = root_node.get_node_or_null(hair_attachment_path)
 	if attachment:
 		for child in attachment.get_children():
@@ -115,7 +128,6 @@ func apply_appearance(data: Dictionary) -> void:
 
 	if data.has("hair_type"):
 		var new_type = int(data["hair_type"])
-		# Zawsze wymuszamy zmianę jeśli nie mamy mesha (np. po zmianie płci)
 		if new_type != current_hair_type or hair_mesh == null or active_hair_node == null:
 			current_hair_type = new_type
 			change_hair_model(current_hair_type)
@@ -139,10 +151,18 @@ func apply_appearance(data: Dictionary) -> void:
 		current_skin_id = data["skin_id"]
 		refresh_all_skin_materials()
 
+	if data.has("tattoo_index"):
+		current_tattoo_index = int(data["tattoo_index"])
+		update_tattoo_texture()
+
+	# NOWE: Wczytywanie koloru tatuażu
+	if data.has("tattoo_color_id"):
+		current_tattoo_color_id = data["tattoo_color_id"]
+		update_tattoo_color(current_tattoo_color_id)
+
 
 func set_gender(new_gender: String) -> void:
 	if new_gender != "female" and new_gender != "male": return
-	
 	var gender_changed = (current_gender != new_gender)
 	current_gender = new_gender
 	
@@ -160,54 +180,61 @@ func set_gender(new_gender: String) -> void:
 	torso_mesh = active_root.get_node_or_null(full_skel_path + "TorsoSlot/Torso")
 	hands_mesh = active_root.get_node_or_null(full_skel_path + "HandsSlot/Hands")
 	head_mesh  = active_root.get_node_or_null(full_skel_path + "HeadSlot/Head")
-	
 	face_mesh_ref = _find_mesh_recursive(active_root, "Face")
 	
-	# Ustawiamy attachment point dla nowej płci
 	active_hair_attachment = active_root.get_node_or_null(hair_attachment_path)
-	
-	# Resetujemy referencje do obiektów, bo zmieniło się całe drzewo
 	hair_mesh = null
 	active_hair_node = null
 	beard_mesh = null
 	active_beard_node = null
 	
-	# Zabezpieczenie limitów przy zmianie płci
 	if gender_changed:
 		var max_hair = get_hair_count()
 		if current_hair_type > max_hair: current_hair_type = 1
 		
 		var max_beard = get_beard_count()
 		if current_beard_type > max_beard: current_beard_type = 1
+		
+		var max_tattoo = get_tattoo_count()
+		if current_tattoo_index > max_tattoo:
+			current_tattoo_index = 0
 
 	change_hair_model(current_hair_type)
 	change_beard_model(current_beard_type)
 	refresh_all_skin_materials()
+	
+	update_tattoo_texture()
+	# Upewniamy się, że kolor też jest ustawiony
+	update_tattoo_color(current_tattoo_color_id)
 
-# --- POMOCNICZE FUNKCJE DLA UI ---
+
+func _count_existing_tattoos(base_path: String, prefix: String) -> int:
+	var count = 0
+	var index = 1
+	while true:
+		var full_path = base_path + prefix + str(index) + ".png"
+		if ResourceLoader.exists(full_path):
+			count += 1
+			index += 1
+		else:
+			break
+	return count
+
 func get_hair_count() -> int:
-	if current_gender == "female":
-		return hair_scenes.size() if hair_scenes else 0
-	else:
-		return male_hair_scenes.size() if male_hair_scenes else 0
+	return hair_scenes.size() if current_gender == "female" else male_hair_scenes.size()
 
 func get_beard_count() -> int:
-	if current_gender == "female":
-		return 0
-	else:
-		return male_beard_scenes.size() if male_beard_scenes else 0
+	return 0 if current_gender == "female" else male_beard_scenes.size()
+
+func get_tattoo_count() -> int:
+	return tattoo_count_male if current_gender == "male" else tattoo_count_female
 
 func change_hair_model(type_index: int) -> void:
 	if not active_hair_attachment: return
-	
-	# POPRAWKA: Pętla czyszcząca wszystkie stare fryzury
-	# Usuwamy wszystko co NIE JEST obecną brodą
 	for child in active_hair_attachment.get_children():
-		if child == active_beard_node and is_instance_valid(active_beard_node):
-			continue # To jest broda, zostawiamy
-		child.queue_free() # To jest stara fryzura lub śmieć, usuwamy
+		if child == active_beard_node and is_instance_valid(active_beard_node): continue 
+		child.queue_free()
 	
-	# Teraz tworzymy nową fryzurę
 	var scenes_list = hair_scenes if current_gender == "female" else male_hair_scenes
 	var array_index = type_index - 1
 	
@@ -216,83 +243,104 @@ func change_hair_model(type_index: int) -> void:
 		if scene_to_spawn:
 			var new_hair_node = scene_to_spawn.instantiate()
 			active_hair_attachment.add_child(new_hair_node)
-			
-			active_hair_node = new_hair_node # Aktualizujemy referencję
-			
+			active_hair_node = new_hair_node
 			hair_mesh = _find_mesh_recursive(new_hair_node, "Hair")
 			if not hair_mesh: hair_mesh = _find_mesh_recursive(new_hair_node, "")
 			update_hair_texture()
 
 func change_beard_model(type_index: int) -> void:
 	if not active_hair_attachment: return
-	
-	# POPRAWKA: Pętla czyszcząca stare brody
-	# Usuwamy wszystko co NIE JEST obecnymi włosami
 	for child in active_hair_attachment.get_children():
-		if child == active_hair_node and is_instance_valid(active_hair_node):
-			continue # To są włosy, zostawiamy
-		child.queue_free() # To stara broda lub śmieć, usuwamy
-	
+		if child == active_hair_node and is_instance_valid(active_hair_node): continue 
+		child.queue_free()
 	if current_gender == "female": return
 	
 	var array_index = type_index - 1
-	
 	if male_beard_scenes != null and array_index >= 0 and array_index < male_beard_scenes.size():
 		var scene_to_spawn = male_beard_scenes[array_index]
 		if scene_to_spawn:
 			var new_beard_node = scene_to_spawn.instantiate()
 			active_hair_attachment.add_child(new_beard_node)
-			
-			active_beard_node = new_beard_node # Aktualizujemy referencję
-			
+			active_beard_node = new_beard_node
 			beard_mesh = _find_mesh_recursive(new_beard_node, "Beard")
 			if not beard_mesh: beard_mesh = _find_mesh_recursive(new_beard_node, "")
-			
 			update_beard_texture()
 
 func update_hair_texture() -> void:
 	if not hair_mesh: return
-	
-	var base_path = ""
-	var texture_name = ""
-
-	if current_gender == "female":
-		base_path = "res://Assets/Resources/textures/FemaleCharacter/Hair/"
-		texture_name = "t_female_hair" + str(current_hair_type) + "_" + current_hair_color + ".png"
-	elif current_gender == "male":
-		base_path = "res://Assets/Resources/textures/MaleCharacter/Hair/"
-		texture_name = "t_male_hair" + str(current_hair_type) + "_" + current_hair_color + ".png"
-
-	var full_path = base_path + texture_name
-	
-	if ResourceLoader.exists(full_path):
-		var new_texture = load(full_path)
-		var current_mat = hair_mesh.get_active_material(0) as StandardMaterial3D
-		if current_mat:
-			if hair_mesh.get_surface_override_material(0) == null:
-				var mat_copy = current_mat.duplicate()
-				hair_mesh.set_surface_override_material(0, mat_copy)
-				mat_copy.albedo_texture = new_texture
-			else:
-				hair_mesh.get_surface_override_material(0).albedo_texture = new_texture
+	var base_path = "res://Assets/Resources/textures/FemaleCharacter/Hair/" if current_gender == "female" else "res://Assets/Resources/textures/MaleCharacter/Hair/"
+	var texture_name = ("t_female_hair" if current_gender == "female" else "t_male_hair") + str(current_hair_type) + "_" + current_hair_color + ".png"
+	_apply_texture_to_mesh(hair_mesh, base_path + texture_name)
 
 func update_beard_texture() -> void:
 	if not beard_mesh: return
-	
 	var base_path = "res://Assets/Resources/textures/MaleCharacter/Beard/"
 	var texture_name = "t_male_beard" + str(current_beard_type) + "_" + current_hair_color + ".png"
+	_apply_texture_to_mesh(beard_mesh, base_path + texture_name)
+
+func _apply_texture_to_mesh(mesh_ref: MeshInstance3D, full_path: String) -> void:
+	if ResourceLoader.exists(full_path):
+		var new_texture = load(full_path)
+		var current_mat = mesh_ref.get_active_material(0) as StandardMaterial3D
+		if current_mat:
+			if mesh_ref.get_surface_override_material(0) == null:
+				var mat_copy = current_mat.duplicate()
+				mesh_ref.set_surface_override_material(0, mat_copy)
+				mat_copy.albedo_texture = new_texture
+			else:
+				mesh_ref.get_surface_override_material(0).albedo_texture = new_texture
+
+# --- LOGIKA TATUAŻY ---
+
+func update_tattoo_texture() -> void:
+	if current_tattoo_index <= 0:
+		_set_tattoo_parameter(null)
+		return
+	
+	var base_path = "res://Assets/Resources/textures/MaleCharacter/Tattoos/" if current_gender == "male" else "res://Assets/Resources/textures/FemaleCharacter/Tattoos/"
+	var texture_name = ("t_male_tattoo_" if current_gender == "male" else "t_female_tattoo_") + str(current_tattoo_index) + ".png"
 	var full_path = base_path + texture_name
 	
 	if ResourceLoader.exists(full_path):
-		var new_texture = load(full_path)
-		var current_mat = beard_mesh.get_active_material(0) as StandardMaterial3D
-		if current_mat:
-			if beard_mesh.get_surface_override_material(0) == null:
-				var mat_copy = current_mat.duplicate()
-				beard_mesh.set_surface_override_material(0, mat_copy)
-				mat_copy.albedo_texture = new_texture
-			else:
-				beard_mesh.get_surface_override_material(0).albedo_texture = new_texture
+		var tex = load(full_path)
+		_set_tattoo_parameter(tex)
+	else:
+		_set_tattoo_parameter(null)
+
+# NOWE: Funkcja ustawiająca kolor
+func update_tattoo_color(color_id: String) -> void:
+	if not tattoo_palette.has(color_id): return
+	var color = tattoo_palette[color_id]
+	current_tattoo_color_id = color_id
+	
+	var body_parts = [torso_mesh, hands_mesh, legs_mesh, feet_mesh] 
+	for mesh_inst in body_parts:
+		if not mesh_inst: continue
+		var count = 1
+		if mesh_inst.mesh: count = mesh_inst.mesh.get_surface_count()
+		if mesh_inst.get_surface_override_material_count() > 0:
+			count = max(count, mesh_inst.get_surface_override_material_count())
+		for i in range(count):
+			var mat = mesh_inst.get_active_material(i)
+			if mat is ShaderMaterial:
+				mat.set_shader_parameter("tattoo_color", color)
+
+func _set_tattoo_parameter(tex: Texture2D) -> void:
+	var body_parts = [torso_mesh, hands_mesh, legs_mesh, feet_mesh] 
+	for mesh_inst in body_parts:
+		if not mesh_inst: continue
+		var count = 1
+		if mesh_inst.mesh: count = mesh_inst.mesh.get_surface_count()
+		if mesh_inst.get_surface_override_material_count() > 0:
+			count = max(count, mesh_inst.get_surface_override_material_count())
+		for i in range(count):
+			var mat = mesh_inst.get_active_material(i)
+			if mat is ShaderMaterial:
+				mat.set_shader_parameter("tattoo_tex", tex)
+				mat.set_shader_parameter("tattoo_opacity", 1.0 if tex else 0.0)
+	
+	# Po ustawieniu tekstury, upewnijmy się, że kolor też jest aktualny
+	update_tattoo_color(current_tattoo_color_id)
 
 # --- LOGIKA SKÓRY ---
 
@@ -305,16 +353,17 @@ func refresh_all_skin_materials() -> void:
 	if legs_mesh: _inject_colors_to_mesh(legs_mesh, colors)
 	if hands_mesh: _inject_colors_to_mesh(hands_mesh, colors)
 	if feet_mesh: _inject_colors_to_mesh(feet_mesh, colors)
-	
 	if face_mesh_ref: _inject_colors_to_mesh(face_mesh_ref, colors)
 
-func _inject_colors_to_mesh(mesh_instance: MeshInstance3D, colors: Dictionary) -> void:
-	var check_count = 1
-	if mesh_instance.mesh: check_count = mesh_instance.mesh.get_surface_count()
-	if mesh_instance.get_surface_override_material_count() > 0:
-		check_count = max(check_count, mesh_instance.get_surface_override_material_count())
+	update_tattoo_texture() # Przywracamy tatuaż na "świeży" materiał
 
-	for i in range(check_count):
+func _inject_colors_to_mesh(mesh_instance: MeshInstance3D, colors: Dictionary) -> void:
+	var count = 1
+	if mesh_instance.mesh: count = mesh_instance.mesh.get_surface_count()
+	if mesh_instance.get_surface_override_material_count() > 0:
+		count = max(count, mesh_instance.get_surface_override_material_count())
+
+	for i in range(count):
 		var mat = mesh_instance.get_active_material(i)
 		if mat is ShaderMaterial:
 			mat.set_shader_parameter("skin_light", colors["light"])

@@ -1,10 +1,10 @@
 [gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://b2m5kaux57h4j"]
 
-[ext_resource type="Texture2D" uid="uid://cxpy7qpwcv8de" path="res://Assets/Resources/textures/MaleCharacter/Body/Male_body_texture.png" id="1_338gu"]
+[ext_resource type="Texture2D" uid="uid://cxpy7qpwcv8de" path="res://Assets/Resources/textures/MaleCharacter/Body/Male_body_texture.png" id="1_bpw43"]
 
 [sub_resource type="Shader" id="Shader_2k2qm"]
 code = "// NOTE: Shader automatically converted from Godot Engine 4.5.stable's StandardMaterial3D.
-// Zoptymalizowany (Branchless) Skin Swap
+// Zoptymalizowany Skin Swap + TATTOO COLOR SWAP + PIXEL ART FIX
 
 shader_type spatial;
 render_mode blend_mix, depth_draw_always, cull_back, diffuse_burley, specular_schlick_ggx, unshaded;
@@ -38,7 +38,14 @@ uniform vec4 skin_light : source_color;
 uniform vec4 skin_mid   : source_color;
 uniform vec4 skin_dark  : source_color;
 
-// Tolerancja - jak blisko musi być kolor, by został uznany za maskę
+// --- UNIFORMY TATUAŻU ---
+// filter_nearest = ostry pixel art
+uniform sampler2D tattoo_tex : source_color, hint_default_transparent, filter_nearest;
+uniform float tattoo_opacity : hint_range(0.0, 1.0) = 1.0;
+// NOWE: Kolor, na jaki podmieniamy tatuaż
+uniform vec3 tattoo_color : source_color = vec3(0.1, 0.1, 0.1); 
+
+// Tolerancja maski skóry
 const float tolerance = 0.01;
 
 void vertex() {
@@ -49,38 +56,34 @@ void fragment() {
 	vec2 base_uv = UV;
 	vec4 albedo_tex = texture(texture_albedo, base_uv);
 
-	// --- LOGIKA PODMIANY KOLORÓW (BRANCHLESS) ---
+	// --- 1. SKIN SWAP LOGIC ---
 	vec3 base_rgb = albedo_tex.rgb;
 
-	// 1. Obliczamy dystans (różnicę) między kolorem piksela a kolorami masek
 	float dist_light = distance(base_rgb, mask_light.rgb);
 	float dist_mid   = distance(base_rgb, mask_mid.rgb);
 	float dist_dark  = distance(base_rgb, mask_dark.rgb);
 
-	// 2. Tworzymy wagi (maski binarne 0.0 lub 1.0)
-	// step(edge, x) zwraca 1.0 jeśli x >= edge.
-	// Tutaj sprawdzamy: czy 'tolerance' jest większe od 'dist'? (czyli czy mieścimy się w tolerancji)
 	float w_light = step(dist_light, tolerance);
 	float w_mid   = step(dist_mid, tolerance);
 	float w_dark  = step(dist_dark, tolerance);
 
-	// 3. Składamy kolor docelowy (zamiennik)
-	// Mnożymy kolor skóry przez wagę. Jeśli waga to 0, kolor jest ignorowany.
 	vec3 replacement_color = (skin_light.rgb * w_light) + (skin_mid.rgb * w_mid) + (skin_dark.rgb * w_dark);
-
-	// 4. Sumujemy wagi, aby wiedzieć, czy w ogóle coś podmieniamy.
-	// clamp(x, 0, 1) zapewnia, że nie przekroczymy 1.0 (gdyby kolory masek na siebie nachodziły)
 	float replacement_mask = clamp(w_light + w_mid + w_dark, 0.0, 1.0);
 
-	// 5. Mieszamy:
-	// Jeśli replacement_mask == 0.0 -> używamy base_rgb (oryginał)
-	// Jeśli replacement_mask == 1.0 -> używamy replacement_color (nowa skóra)
 	vec3 final_rgb = mix(base_rgb, replacement_color, replacement_mask);
+	
+	// --- 2. TATTOO LOGIC ---
+	vec4 tattoo_sample = texture(tattoo_tex, base_uv);
+	
+	// Zamiast używać tattoo_sample.rgb (oryginalnego koloru z pliku),
+	// używamy naszego 'tattoo_color'. 
+	// Kanał Alpha (tattoo_sample.a) decyduje, gdzie tatuaż jest widoczny.
+	
+	final_rgb = mix(final_rgb, tattoo_color, tattoo_sample.a * tattoo_opacity);
 
-	// Aplikujemy ostateczny kolor (razem z tintem albedo materiału)
+	// --- 3. FINAL OUTPUT ---
 	ALBEDO = albedo.rgb * final_rgb;
 
-	// --- RESZTA ORYGINALNEGO SHADERA ---
 	float metallic_tex = dot(texture(texture_metallic, base_uv), metallic_texture_channel);
 	METALLIC = metallic_tex * metallic;
 	SPECULAR = specular;
@@ -97,7 +100,7 @@ void fragment() {
 render_priority = 0
 shader = SubResource("Shader_2k2qm")
 shader_parameter/albedo = Color(1, 1, 1, 1)
-shader_parameter/texture_albedo = ExtResource("1_338gu")
+shader_parameter/texture_albedo = ExtResource("1_bpw43")
 shader_parameter/alpha_scissor_threshold = 0.0
 shader_parameter/albedo_texture_size = Vector2i(256, 256)
 shader_parameter/point_size = 1.0
@@ -115,3 +118,5 @@ shader_parameter/mask_dark = Color(0.7137255, 0.4509804, 0.4, 1)
 shader_parameter/skin_light = Color(0.8901961, 0.6039216, 0.5372549, 1)
 shader_parameter/skin_mid = Color(0.8392157, 0.56078434, 0.5137255, 1)
 shader_parameter/skin_dark = Color(0.7137255, 0.4509804, 0.4, 1)
+shader_parameter/tattoo_opacity = 1.0
+shader_parameter/tattoo_color = Color(0.1, 0.1, 0.1, 1)

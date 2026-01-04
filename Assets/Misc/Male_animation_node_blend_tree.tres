@@ -6,19 +6,18 @@ animation = &"Female_Animlib/Female_Fall"
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_6k6sk"]
 animation = &"Female_Animlib/Female_Jump"
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_8vjbk"]
-animation = &"Female_Animlib/Female_Jog"
-
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_yttnx"]
 animation = &"Male_Animlib/Male_Idle"
 
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_hda3f"]
+animation = &"Male_Animlib/Male_Jog"
+
 [sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_7na56"]
-blend_point_0/node = SubResource("AnimationNodeAnimation_8vjbk")
-blend_point_0/pos = 1.0
-blend_point_1/node = SubResource("AnimationNodeAnimation_yttnx")
-blend_point_1/pos = 0.0
+blend_point_0/node = SubResource("AnimationNodeAnimation_yttnx")
+blend_point_0/pos = 0.0
+blend_point_1/node = SubResource("AnimationNodeAnimation_hda3f")
+blend_point_1/pos = 1.0
 min_space = 0.0
-sync = true
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_dqq1j"]
 xfade_time = 0.3
@@ -51,10 +50,10 @@ states/Idle_to_jog_Male/node = SubResource("AnimationNodeBlendSpace1D_7na56")
 states/Idle_to_jog_Male/position = Vector2(369, 100)
 states/Start/position = Vector2(135, 100)
 transitions = ["Female_Animlib_Female_Jump", "Female_Animlib_Female_Fall", SubResource("AnimationNodeStateMachineTransition_dqq1j"), "Start", "Idle_to_jog_Male", SubResource("AnimationNodeStateMachineTransition_0pfsv"), "Idle_to_jog_Male", "Female_Animlib_Female_Jump", SubResource("AnimationNodeStateMachineTransition_6k6sk"), "Idle_to_jog_Male", "Female_Animlib_Female_Fall", SubResource("AnimationNodeStateMachineTransition_asdu2"), "Female_Animlib_Female_Fall", "Idle_to_jog_Male", SubResource("AnimationNodeStateMachineTransition_8vjbk")]
-graph_offset = Vector2(-322, -152)
+graph_offset = Vector2(-420, -81)
 
 [resource]
-graph_offset = Vector2(-791.6228, 116.52806)
+graph_offset = Vector2(-527.10004, 149.90001)
 nodes/MaleLocomotion/node = SubResource("AnimationNodeStateMachine_kfppw")
 nodes/MaleLocomotion/position = Vector2(-280, 140)
 node_connections = [&"output", 0, &"MaleLocomotion"]

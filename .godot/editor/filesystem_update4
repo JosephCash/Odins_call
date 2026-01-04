@@ -1,7 +1,9 @@
-res://Assets/Resources/Materials/FemaleCharacter/Female_face_ShaderMaterial.tres
-res://Assets/Resources/Materials/FemaleCharacter/Female_body_ShaderMaterial.tres
-res://Assets/Resources/Materials/MaleCharacter/Male_face_ShaderMaterial.tres
-res://Assets/Resources/Materials/MaleCharacter/Male_body_ShaderMaterial.tres
+res://Assets/Resources/Animations/Male_Jog.res
+res://Scenes/Player/character_controller/player.tscn
+res://Assets/Resources/Materials/FemaleCharacter/Body/Female_face_ShaderMaterial.tres
+res://Assets/Resources/Materials/FemaleCharacter/Body/Female_body_ShaderMaterial.tres
+res://Assets/Resources/Materials/MaleCharacter/Body/Male_face_ShaderMaterial.tres
+res://Assets/Resources/Materials/MaleCharacter/Body/Male_body_ShaderMaterial.tres
 res://Assets/Misc/Female_animation_node_blend_tree.tres
 res://Assets/Misc/Male_animation_node_blend_tree.tres
 res://Player_inventory/item/items/Health Potions/Small_health_potion.tres
@@ -14,16 +16,3 @@ res://Player_inventory/item/items/Armor/Leather_set_of_the_north/Leather_boots_o
 res://Player_inventory/item/items/Trinkets/Silver_ring.tres
 res://Player_inventory/item/items/Health Potions/Medium_health_potion.tres
 res://Player_inventory/Player_inv.tres
-res://Scripts/Player/controllers/player_mesh_controller.gd
-res://Scenes/Player/Hair/male_beard_1_skeletalmesh.tscn
-res://Assets/Resources/Materials/MaleCharacter/Beard/male_Beard1_blonde.tres
-res://Assets/Resources/Materials/MaleCharacter/Beard/male_Beard1_black.tres
-res://Assets/Resources/Materials/MaleCharacter/Beard/male_Beard1_brown.tres
-res://Assets/Resources/Materials/MaleCharacter/Beard/male_Beard1_orange.tres
-res://Assets/Resources/Materials/MaleCharacter/Beard/male_Beard1_white.tres
-res://Scenes/Player/character_controller/player.tscn
-res://Scenes/UI/CharacterCreation.tscn
-res://Scripts/UI/CharacterCreator.gd
-res://Scripts/Player/player_manager.gd
-res://Assets/Resources/Materials/MaleCharacter/Body/Male_body_ShaderMaterial.tres
-res://Assets/Resources/Materials/FemaleCharacter/Body/Female_body_ShaderMaterial.tres

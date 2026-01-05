@@ -4,7 +4,7 @@
 
 [sub_resource type="Shader" id="Shader_2k2qm"]
 code = "// NOTE: Shader automatically converted from Godot Engine 4.5.stable's StandardMaterial3D.
-// Zoptymalizowany Skin Swap + TATTOO COLOR SWAP + PIXEL ART FIX
+// Zoptymalizowany Skin Swap + TATTOO COLOR SWAP + PIXEL ART FIX + 80% TRANSPARENCY
 
 shader_type spatial;
 render_mode blend_mix, depth_draw_always, cull_back, diffuse_burley, specular_schlick_ggx, unshaded;
@@ -42,7 +42,7 @@ uniform vec4 skin_dark  : source_color;
 // filter_nearest = ostry pixel art
 uniform sampler2D tattoo_tex : source_color, hint_default_transparent, filter_nearest;
 uniform float tattoo_opacity : hint_range(0.0, 1.0) = 1.0;
-// NOWE: Kolor, na jaki podmieniamy tatuaż
+// Kolor, na jaki podmieniamy tatuaż
 uniform vec3 tattoo_color : source_color = vec3(0.1, 0.1, 0.1); 
 
 // Tolerancja maski skóry
@@ -75,11 +75,12 @@ void fragment() {
 	// --- 2. TATTOO LOGIC ---
 	vec4 tattoo_sample = texture(tattoo_tex, base_uv);
 	
-	// Zamiast używać tattoo_sample.rgb (oryginalnego koloru z pliku),
-	// używamy naszego 'tattoo_color'. 
-	// Kanał Alpha (tattoo_sample.a) decyduje, gdzie tatuaż jest widoczny.
+	// ZMIANA: Dodano mnożnik * 0.8.
+	// tattoo_sample.a (maska z pliku) * tattoo_opacity (suwak) * 0.8 (stała przezroczystość)
+	// Dzięki temu tatuaż nigdy nie jest w 100% pełny, wygląda jak wtopiony w skórę.
+	float tattoo_blend_factor = tattoo_sample.a * tattoo_opacity * 0.9;
 	
-	final_rgb = mix(final_rgb, tattoo_color, tattoo_sample.a * tattoo_opacity);
+	final_rgb = mix(final_rgb, tattoo_color, tattoo_blend_factor);
 
 	// --- 3. FINAL OUTPUT ---
 	ALBEDO = albedo.rgb * final_rgb;

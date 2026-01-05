@@ -1,0 +1,99 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://u2exw57r7moh"
+path="res://.godot/imported/Male_character_skeletal_mesh.glb-8e333e4885406eca51a802ca984d3373.scn"
+
+[deps]
+
+source_file="res://Assets/GLB_Files/Male/Male_character_skeletal_mesh.glb"
+dest_files=["res://.godot/imported/Male_character_skeletal_mesh.glb-8e333e4885406eca51a802ca984d3373.scn"]
+
+[params]
+
+nodes/root_type=""
+nodes/root_name=""
+nodes/root_script=null
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+nodes/import_as_skeleton_bones=false
+nodes/use_name_suffixes=true
+nodes/use_node_type_suffixes=true
+meshes/ensure_tangents=true
+meshes/generate_lods=true
+meshes/create_shadow_meshes=true
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+meshes/force_disable_compression=false
+skins/use_named_skins=true
+animation/import=true
+animation/fps=30
+animation/trimming=false
+animation/remove_immutable_tracks=true
+animation/import_rest_as_RESET=false
+import_script/path=""
+materials/extract=0
+materials/extract_format=0
+materials/extract_path=""
+_subresources={
+"meshes": {
+"Male_character_skeletal_mesh_Plane": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://Assets/Resources/Mesh/MaleCharacter/Body/Feet.res",
+"save_to_file/path": "uid://brpaj41i4dpue"
+},
+"Male_character_skeletal_mesh_Plane_001": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://Assets/Resources/Mesh/MaleCharacter/Body/Head.res",
+"save_to_file/path": "uid://cjpdse1k3f10x"
+},
+"Male_character_skeletal_mesh_Plane_002": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://Assets/Resources/Mesh/MaleCharacter/Body/Torso.res",
+"save_to_file/path": "uid://d08so6s18u2g"
+},
+"Male_character_skeletal_mesh_Plane_004": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://Assets/Resources/Mesh/MaleCharacter/Body/Legs.res",
+"save_to_file/path": "uid://dho0i5b7errrs"
+},
+"Male_character_skeletal_mesh_Plane_006": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://Assets/Resources/Mesh/MaleCharacter/Body/Hands.res",
+"save_to_file/path": "uid://cb6kpgt8xywvx"
+},
+"Male_character_skeletal_mesh_Plane_014": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://Assets/Resources/Mesh/MaleCharacter/Body/Face.res",
+"save_to_file/path": "uid://dntxkhh1l5lkt"
+}
+}
+}
+gltf/naming_version=2
+gltf/embedded_image_handling=1

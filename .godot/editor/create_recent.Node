@@ -1,3 +1,4 @@
+Jigglebone
 Node3D
 Button
 VBoxContainer
@@ -5,7 +6,6 @@ ColorRect
 Control
 CollisionShape3D
 Area3D
-Jigglebone
 HSeparator
 HBoxContainer
 Label

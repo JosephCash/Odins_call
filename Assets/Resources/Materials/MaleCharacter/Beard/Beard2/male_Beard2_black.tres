@@ -1,0 +1,11 @@
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://dvsop6sgpt7xp"]
+
+[ext_resource type="Texture2D" uid="uid://cg1kxj54smada" path="res://Assets/Resources/textures/MaleCharacter/Beard/Beard2/t_male_beard2_black.png" id="1_6761p"]
+
+[resource]
+transparency = 1
+cull_mode = 2
+depth_draw_mode = 1
+shading_mode = 0
+albedo_texture = ExtResource("1_6761p")
+texture_filter = 2
